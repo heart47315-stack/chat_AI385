@@ -1,0 +1,32 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Character {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  personality String
+  scenario    String
+  avatar      String
+  tags        String
+  isNSFW      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  messages    Message[]
+}
+
+model Message {
+  id          String   @id @default(uuid())
+  characterId String
+  sender      String   // "user" | "ai"
+  content     String
+  createdAt   DateTime @default(now())
+
+  character   Character @relation(fields: [characterId], references: [id])
+}
