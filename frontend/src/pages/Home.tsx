@@ -22,9 +22,17 @@ export default function Home() {
   return (
     <div className="bg-black min-h-screen text-white">
       {/* Header */}
-      <div className="px-6 py-8 border-b border-zinc-800">
-        <h1 className="text-4xl font-bold mb-2">🔥 Characters</h1>
-        <p className="text-gray-400">Meet and chat with unique AI characters</p>
+      <div className="px-6 py-8 border-b border-zinc-800 flex justify-between items-center">
+        <div>
+          <h1 className="text-4xl font-bold mb-2">🔥 Characters</h1>
+          <p className="text-gray-400">Meet and chat with unique AI characters</p>
+        </div>
+        <Link
+          to="/create-character"
+          className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 shadow-lg shadow-purple-500/30 hover:shadow-lg hover:shadow-purple-500/50"
+        >
+          ✨ Create Character
+        </Link>
       </div>
 
       {/* Characters Grid */}
@@ -43,21 +51,21 @@ export default function Home() {
               <Link
                 to={`/chat/${c.id}`}
                 key={c.id}
-                className="group relative overflow-hidden rounded-2xl bg-gradient-to-b from-zinc-800 to-zinc-900 border border-zinc-700 hover:border-purple-500 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/20"
+                className="card-hover group relative overflow-hidden rounded-2xl bg-gradient-to-b from-zinc-800 to-zinc-900 border border-zinc-700 hover:border-purple-400 shadow-lg"
               >
-                {/* Image Container */}
-                <div className="relative h-48 overflow-hidden bg-zinc-800">
+                {/* Image Container - 🎭 Emphasized */}
+                <div className="relative h-56 overflow-hidden bg-zinc-800">
                   <img
                     src={c.avatar || "https://via.placeholder.com/300x300?text=" + c.name}
                     alt={c.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-500 ease-out"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-transparent to-transparent opacity-70 group-hover:opacity-40 transition-opacity duration-300" />
                 </div>
 
                 {/* Content */}
                 <div className="p-4 relative z-10">
-                  <h2 className="text-lg font-bold mb-1 line-clamp-1">{c.name}</h2>
+                  <h2 className="text-lg font-bold mb-1 line-clamp-1 group-hover:text-purple-300 transition-colors duration-300">{c.name}</h2>
                   <p className="text-sm text-gray-300 mb-3 line-clamp-2">{c.description}</p>
 
                   {/* Tags */}
@@ -66,7 +74,7 @@ export default function Home() {
                       c.tags.split(",").map((tag: string, i: number) => (
                         <span
                           key={i}
-                          className="text-xs px-2 py-1 bg-purple-900/50 border border-purple-500/50 rounded-full text-purple-200 hover:bg-purple-800/50 transition"
+                          className="text-xs px-2 py-1 bg-purple-900/50 border border-purple-500/50 rounded-full text-purple-200 hover:bg-purple-800/50 transition-colors duration-200"
                         >
                           {tag.trim()}
                         </span>
@@ -76,21 +84,18 @@ export default function Home() {
                   {/* NSFW Badge */}
                   {c.isNSFW && (
                     <div className="flex items-center gap-1 text-xs text-red-400 mb-2">
-                      <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                      <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
                       NSFW
                     </div>
                   )}
 
                   {/* CTA Button */}
                   <div className="pt-2 border-t border-zinc-700">
-                    <div className="text-sm font-semibold text-purple-400 group-hover:text-purple-300 transition">
+                    <div className="text-sm font-semibold text-purple-400 group-hover:text-purple-200 transition-colors duration-300">
                       Start Chat →
                     </div>
                   </div>
                 </div>
-
-                {/* Hover Glow Effect */}
-                <div className="absolute inset-0 bg-purple-500/0 group-hover:bg-purple-500/10 transition-colors duration-300" />
               </Link>
             ))}
           </div>

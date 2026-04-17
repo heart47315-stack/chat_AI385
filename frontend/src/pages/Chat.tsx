@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import axios from "axios"
 
 interface Message {
@@ -23,6 +23,13 @@ export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([])
   const [character, setCharacter] = useState<Character | null>(null)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  // Auto-scroll to latest message
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [messages])
 
   // Fetch character info
   useEffect(() => {
@@ -31,9 +38,16 @@ export default function Chat() {
         .get(`http://localhost:5000/character`)
         .then(res => {
           const char = res.data.find((c: Character) => c.id === id)
-          setCharacter(char)
+          if (char) {
+            setCharacter(char)
+          } else {
+            setError("Character not found")
+          }
         })
-        .catch(err => console.error("Failed to fetch character:", err))
+        .catch(err => {
+          console.error("Failed to fetch character:", err)
+          setError("Failed to load character")
+        })
     }
   }, [id])
 
@@ -41,20 +55,24 @@ export default function Chat() {
     if (!input.trim()) return
 
     setLoading(true)
+    setError("")
     const userMessage: Message = { role: "user", content: input }
     setMessages(prev => [...prev, userMessage])
+    const currentInput = input
     setInput("")
 
     try {
       const res = await axios.post("http://localhost:5000/chat", {
-        message: input,
+        message: currentInput,
         characterId: id
       })
 
       const aiMessage: Message = { role: "ai", content: res.data.reply }
       setMessages(prev => [...prev, aiMessage])
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to send message:", err)
+      setError(err.response?.data?.error || "Failed to send message")
+      setMessages(prev => prev.filter((_, i) => i !== prev.length - 1))
     } finally {
       setLoading(false)
     }
@@ -63,7 +81,11 @@ export default function Chat() {
   if (!character) {
     return (
       <div className="bg-black min-h-screen flex items-center justify-center">
-        <div className="text-gray-400">Loading character...</div>
+        <div className="text-center">
+          <div className="text-4xl mb-4">⏳</div>
+          <p className="text-gray-400 mb-2">Loading character...</p>
+          {error && <p className="text-red-400 text-sm">{error}</p>}
+        </div>
       </div>
     )
   }
@@ -71,11 +93,11 @@ export default function Chat() {
   return (
     <div className="bg-black min-h-screen flex flex-col text-white">
       {/* Header with Character Info */}
-      <div className="border-b border-zinc-700 bg-gradient-to-b from-zinc-900 to-black p-4">
+      <div className="border-b border-zinc-700 bg-gradient-to-b from-zinc-900 to-black p-4 shadow-lg shadow-zinc-900/50">
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate("/")}
-            className="text-gray-400 hover:text-white transition text-2xl"
+            className="text-gray-400 hover:text-purple-400 transition text-2xl duration-200"
           >
             ←
           </button>
@@ -87,10 +109,17 @@ export default function Chat() {
           <img
             src={character.avatar || "https://via.placeholder.com/60"}
             alt={character.name}
-            className="w-16 h-16 rounded-lg object-cover border border-purple-500/50"
+            className="w-16 h-16 rounded-lg object-cover border-2 border-purple-500/60 shadow-lg shadow-purple-500/20"
           />
         </div>
       </div>
+
+      {/* Error message */}
+      {error && (
+        <div className="bg-red-900/50 border-b border-red-500 px-4 py-2 text-red-200 text-sm">
+          ❌ {error}
+        </div>
+      )}
 
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -106,13 +135,13 @@ export default function Chat() {
           messages.map((msg, i) => (
             <div
               key={i}
-              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate-fade-in`}
             >
               <div
-                className={`max-w-xs lg:max-w-md px-4 py-3 rounded-xl ${
+                className={`max-w-xs lg:max-w-md px-4 py-3 rounded-xl shadow-md transition-all duration-200 ${
                   msg.role === "user"
-                    ? "bg-purple-600 text-white rounded-br-none"
-                    : "bg-zinc-800 text-gray-100 rounded-bl-none border border-zinc-700"
+                    ? "bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-br-none shadow-purple-500/20"
+                    : "bg-zinc-800 text-gray-100 rounded-bl-none border border-zinc-700 shadow-zinc-900/50"
                 }`}
               >
                 <p className="text-sm md:text-base leading-relaxed">{msg.content}</p>
@@ -121,8 +150,8 @@ export default function Chat() {
           ))
         )}
         {loading && (
-          <div className="flex justify-start">
-            <div className="bg-zinc-800 px-4 py-3 rounded-xl border border-zinc-700">
+          <div className="flex justify-start animate-fade-in">
+            <div className="bg-zinc-800 px-4 py-3 rounded-xl border border-zinc-700 shadow-md shadow-zinc-900/50">
               <div className="flex gap-2">
                 <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
                 <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
@@ -131,24 +160,28 @@ export default function Chat() {
             </div>
           </div>
         )}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Input Area */}
-      <div className="border-t border-zinc-700 bg-gradient-to-t from-black to-zinc-900 p-4">
+      <div className="border-t border-zinc-700 bg-gradient-to-t from-black to-zinc-900 p-4 shadow-lg shadow-black/50">
         <div className="flex gap-3">
           <input
             type="text"
             value={input}
-            onChange={e => setInput(e.target.value)}
+            onChange={e => {
+              setInput(e.target.value)
+              setError("")
+            }}
             onKeyDown={e => e.key === "Enter" && !loading && send()}
             placeholder={`Message ${character.name}...`}
-            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition"
+            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-500 transition-all duration-200 shadow-md shadow-zinc-900/50"
             disabled={loading}
           />
           <button
             onClick={send}
             disabled={loading || !input.trim()}
-            className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+            className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 disabled:from-gray-700 disabled:to-gray-700 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 shadow-lg shadow-purple-500/30 hover:shadow-lg hover:shadow-purple-500/50 disabled:shadow-none"
           >
             {loading ? "..." : "Send"}
           </button>
