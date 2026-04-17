@@ -1,22 +1,18 @@
-import express from "express"
+import { Router } from "express"
 import { PrismaClient } from "@prisma/client"
 
-const router = express.Router()
+const router = Router()
 const prisma = new PrismaClient()
 
-router.get("/", async (_, res) => {
-  const data = await prisma.character.findMany()
-  res.json(data)
+router.get("/", async (req, res) => {
+  const characters = await prisma.character.findMany()
+  res.json(characters)
 })
 
 router.post("/", async (req, res) => {
-  const c = await prisma.character.create({ data: req.body })
-  res.json(c)
+  const data = req.body
+  const character = await prisma.character.create({ data })
+  res.json(character)
 })
-router.post("/", async (req, res) => {
-  const data = await prisma.character.create({
-    data: req.body
-  })
-  res.json(data)
-})
+
 export default router
