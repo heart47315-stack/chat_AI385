@@ -61,7 +61,7 @@ export default function Chat() {
 
       // Fetch message history
       axios
-        .get(`http://localhost:5000/message?characterId=${id}`)
+        .get(`http://localhost:5000/chat?characterId=${id}`)
         .then(res => {
           if (res.data && Array.isArray(res.data)) {
             const msgs: Message[] = res.data.map((m: any) => ({
