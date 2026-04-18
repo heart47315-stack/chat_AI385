@@ -3,14 +3,17 @@
 @tailwind utilities;
 
 body {
-  background: #0a0a0a;
+  background: #e7e1e1;
 }
 
 /* Floating Card Animation */
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px);
   }
+
   50% {
     transform: translateY(-8px);
   }
@@ -18,13 +21,16 @@ body {
 
 /* Glow Effect */
 @keyframes glow {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 20px rgba(168, 85, 247, 0),
-                0 20px 40px rgba(0, 0, 0, 0.4);
+      0 20px 40px rgba(118, 116, 116, 0.4);
   }
+
   50% {
     box-shadow: 0 0 40px rgba(168, 85, 247, 0.3),
-                0 20px 60px rgba(168, 85, 247, 0.1);
+      0 20px 60px rgba(168, 85, 247, 0.1);
   }
 }
 
@@ -32,13 +38,14 @@ body {
 @keyframes lift {
   from {
     transform: translateY(0px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3),
-                0 0 20px rgba(168, 85, 247, 0);
+    box-shadow: 0 10px 25px rgba(175, 165, 165, 0.3),
+      0 0 20px rgba(122, 106, 138, 0);
   }
+
   to {
     transform: translateY(-12px);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5),
-                0 0 40px rgba(168, 85, 247, 0.2);
+      0 0 40px rgba(168, 85, 247, 0.2);
   }
 }
 
@@ -48,6 +55,7 @@ body {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0px);

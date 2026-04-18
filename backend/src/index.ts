@@ -17,7 +17,14 @@ app.use(express.json())
 
 // Health check
 app.get("/health", (req, res) => {
-  res.json({ status: "OK" })
+  res.json({ status: "OK", timestamp: new Date().toISOString() })
+})
+
+// Test endpoint
+app.post("/test", (req, res) => {
+  console.log("🧪 Test endpoint called")
+  console.log("Request body:", req.body)
+  res.json({ success: true, message: "Test successful", received: req.body })
 })
 
 app.use("/chat", chatRoute)
@@ -25,7 +32,8 @@ app.use("/character", characterRoute)
 
 // Error handling
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error("Error:", err)
+  console.error("🔴 Unhandled error:", err.message)
+  console.error("Stack:", err.stack)
   res.status(err.status || 500).json({ error: err.message || "Internal server error" })
 })
 

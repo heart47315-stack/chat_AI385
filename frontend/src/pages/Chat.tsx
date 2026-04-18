@@ -26,33 +26,70 @@ export default function Chat() {
   const [error, setError] = useState("")
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
+  // Test API connectivity
+  useEffect(() => {
+    axios
+      .post("http://localhost:5000/test", { test: "connection" })
+      .then(() => console.log("✅ API connection test passed"))
+      .catch(err => console.error("❌ API connection test failed:", err.message))
+  }, [])
+
   // Auto-scroll to latest message
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
 
-  // Fetch character info
+  // Fetch character info and message history
   useEffect(() => {
     if (id) {
+      // Fetch character
       axios
         .get(`http://localhost:5000/character`)
         .then(res => {
           const char = res.data.find((c: Character) => c.id === id)
           if (char) {
             setCharacter(char)
+            console.log("✅ Character loaded:", char)
           } else {
             setError("Character not found")
           }
         })
         .catch(err => {
-          console.error("Failed to fetch character:", err)
-          setError("Failed to load character")
+          console.error("❌ Failed to fetch character:", err)
+          setError("Failed to load character - Backend connection error")
+        })
+
+      // Fetch message history
+      axios
+        .get(`http://localhost:5000/message?characterId=${id}`)
+        .then(res => {
+          if (res.data && Array.isArray(res.data)) {
+            const msgs: Message[] = res.data.map((m: any) => ({
+              role: m.sender === "user" ? "user" : "ai",
+              content: m.content
+            }))
+            setMessages(msgs)
+            console.log("📋 Loaded", msgs.length, "messages")
+          }
+        })
+        .catch(err => {
+          console.error("⚠️ Failed to load message history:", err.message)
+          // Don't set error as this is optional
         })
     }
   }, [id])
 
   const send = async () => {
-    if (!input.trim()) return
+    if (!input.trim()) {
+      console.log("⚠️ Empty message")
+      return
+    }
+
+    if (!id) {
+      setError("❌ Character ID is missing")
+      console.error("❌ Character ID is undefined:", id)
+      return
+    }
 
     setLoading(true)
     setError("")
@@ -61,17 +98,24 @@ export default function Chat() {
     const currentInput = input
     setInput("")
 
+    console.log("📤 Sending message:", { message: currentInput, characterId: id })
+
     try {
       const res = await axios.post("http://localhost:5000/chat", {
         message: currentInput,
         characterId: id
       })
 
+      console.log("📥 Server response:", res.data)
+
       const aiMessage: Message = { role: "ai", content: res.data.reply }
       setMessages(prev => [...prev, aiMessage])
     } catch (err: any) {
-      console.error("Failed to send message:", err)
-      setError(err.response?.data?.error || "Failed to send message")
+      console.error("❌ Failed to send message:", err)
+      console.error("Error response:", err.response?.data)
+      console.error("Error status:", err.response?.status)
+      
+      setError(err.response?.data?.error || err.message || "Failed to send message")
       setMessages(prev => prev.filter((_, i) => i !== prev.length - 1))
     } finally {
       setLoading(false)
