@@ -1,6 +1,8 @@
 import { useParams, useNavigate } from "react-router-dom"
 import { useState, useEffect, useRef } from "react"
+import { motion } from "framer-motion"
 import axios from "axios"
+import PageTransition from "../components/PageTransition"
 
 interface Message {
   role: "user" | "ai"
@@ -26,7 +28,6 @@ export default function Chat() {
   const [error, setError] = useState("")
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  // Test API connectivity
   useEffect(() => {
     axios
       .post("http://localhost:5000/test", { test: "connection" })
@@ -34,15 +35,12 @@ export default function Chat() {
       .catch(err => console.error("❌ API connection test failed:", err.message))
   }, [])
 
-  // Auto-scroll to latest message
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
 
-  // Fetch character info and message history
   useEffect(() => {
     if (id) {
-      // Fetch character
       axios
         .get(`http://localhost:5000/character`)
         .then(res => {
@@ -59,7 +57,6 @@ export default function Chat() {
           setError("Failed to load character - Backend connection error")
         })
 
-      // Fetch message history
       axios
         .get(`http://localhost:5000/chat?characterId=${id}`)
         .then(res => {
@@ -74,7 +71,6 @@ export default function Chat() {
         })
         .catch(err => {
           console.error("⚠️ Failed to load message history:", err.message)
-          // Don't set error as this is optional
         })
     }
   }, [id])
@@ -124,113 +120,167 @@ export default function Chat() {
 
   if (!character) {
     return (
-      <div className="bg-black min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-4xl mb-4">⏳</div>
-          <p className="text-gray-400 mb-2">Loading character...</p>
-          {error && <p className="text-red-400 text-sm">{error}</p>}
+      <PageTransition>
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            className="w-16 h-16 border-4 border-white/20 border-t-blue-500 rounded-full"
+          />
         </div>
-      </div>
+      </PageTransition>
     )
   }
 
   return (
-    <div className="bg-black min-h-screen flex flex-col text-white">
-      {/* Header with Character Info */}
-      <div className="border-b border-zinc-700 bg-gradient-to-b from-zinc-900 to-black p-4 shadow-lg shadow-zinc-900/50">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => navigate("/")}
-            className="text-gray-400 hover:text-purple-400 transition text-2xl duration-200"
-          >
-            ←
-          </button>
-          <div className="flex-1">
-            <h1 className="text-2xl font-bold">{character.name}</h1>
-            <p className="text-gray-400 text-sm">{character.description}</p>
-            <p className="text-purple-400 text-xs mt-1">💭 {character.scenario}</p>
-          </div>
-          <img
-            src={character.avatar || "https://via.placeholder.com/60"}
-            alt={character.name}
-            className="w-16 h-16 rounded-lg object-cover border-2 border-purple-500/60 shadow-lg shadow-purple-500/20"
-          />
-        </div>
-      </div>
-
-      {/* Error message */}
-      {error && (
-        <div className="bg-red-900/50 border-b border-red-500 px-4 py-2 text-red-200 text-sm">
-          ❌ {error}
-        </div>
-      )}
-
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-gray-400">
-            <div className="text-6xl mb-4">💬</div>
-            <p className="text-lg">Start a conversation with {character.name}</p>
-            <p className="text-sm mt-2 max-w-md text-center">
-              {character.personality}
-            </p>
-          </div>
-        ) : (
-          messages.map((msg, i) => (
-            <div
-              key={i}
-              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate-fade-in`}
+    <PageTransition>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col text-white pb-24">
+        {/* Header */}
+        <motion.header
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="sticky top-0 z-40 bg-black/30 backdrop-blur-2xl border-b border-white/10 py-4 px-4 shadow-lg"
+        >
+          <div className="max-w-4xl mx-auto flex items-center gap-4">
+            <motion.button
+              whileHover={{ x: -5 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => navigate("/")}
+              className="text-white/70 hover:text-white transition text-2xl"
             >
-              <div
-                className={`max-w-xs lg:max-w-md px-4 py-3 rounded-xl shadow-md transition-all duration-200 ${
-                  msg.role === "user"
-                    ? "bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-br-none shadow-purple-500/20"
-                    : "bg-zinc-800 text-gray-100 rounded-bl-none border border-zinc-700 shadow-zinc-900/50"
-                }`}
-              >
-                <p className="text-sm md:text-base leading-relaxed">{msg.content}</p>
-              </div>
+              ←
+            </motion.button>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-xl font-bold truncate">{character.name}</h1>
+              <p className="text-white/60 text-sm truncate">{character.description}</p>
             </div>
-          ))
-        )}
-        {loading && (
-          <div className="flex justify-start animate-fade-in">
-            <div className="bg-zinc-800 px-4 py-3 rounded-xl border border-zinc-700 shadow-md shadow-zinc-900/50">
-              <div className="flex gap-2">
-                <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
-                <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
-              </div>
-            </div>
+            <motion.img
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ type: "spring", delay: 0.2 }}
+              src={character.avatar || "https://via.placeholder.com/60"}
+              alt={character.name}
+              className="w-14 h-14 rounded-xl object-cover border-2 border-blue-500/50 shadow-lg shadow-blue-500/20"
+            />
           </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
+        </motion.header>
 
-      {/* Input Area */}
-      <div className="border-t border-zinc-700 bg-gradient-to-t from-black to-zinc-900 p-4 shadow-lg shadow-black/50">
-        <div className="flex gap-3">
-          <input
-            type="text"
-            value={input}
-            onChange={e => {
-              setInput(e.target.value)
-              setError("")
-            }}
-            onKeyDown={e => e.key === "Enter" && !loading && send()}
-            placeholder={`Message ${character.name}...`}
-            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-500 transition-all duration-200 shadow-md shadow-zinc-900/50"
-            disabled={loading}
-          />
-          <button
-            onClick={send}
-            disabled={loading || !input.trim()}
-            className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 disabled:from-gray-700 disabled:to-gray-700 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 shadow-lg shadow-purple-500/30 hover:shadow-lg hover:shadow-purple-500/50 disabled:shadow-none"
+        {/* Error Banner */}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="mx-4 mt-4 bg-red-500/20 border border-red-500/50 rounded-lg px-4 py-3 text-red-300 text-sm backdrop-blur-md"
           >
-            {loading ? "..." : "Send"}
-          </button>
-        </div>
+            ❌ {error}
+          </motion.div>
+        )}
+
+        {/* Messages Area */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="flex-1 overflow-y-auto px-4 py-6 max-w-4xl mx-auto w-full"
+        >
+          {messages.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="h-full flex flex-col items-center justify-center text-center py-20"
+            >
+              <motion.div
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 3, repeat: Infinity }}
+                className="text-6xl mb-4"
+              >
+                💬
+              </motion.div>
+              <p className="text-xl font-semibold">Start a conversation with {character.name}</p>
+              <p className="text-white/60 text-sm mt-3 max-w-sm">{character.personality}</p>
+            </motion.div>
+          ) : (
+            <motion.div className="space-y-4">
+              {messages.map((msg, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: msg.role === "user" ? 100 : -100 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                >
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    className={`max-w-xs sm:max-w-md lg:max-w-lg px-5 py-3 rounded-2xl backdrop-blur-md transition-all ${
+                      msg.role === "user"
+                        ? "bg-gradient-to-r from-blue-600/80 to-cyan-600/80 text-white rounded-br-none border border-blue-500/30 shadow-lg shadow-blue-500/20"
+                        : "bg-white/10 text-white/90 rounded-bl-none border border-white/20 shadow-lg shadow-black/20"
+                    }`}
+                  >
+                    <p className="text-sm md:text-base leading-relaxed">{msg.content}</p>
+                  </motion.div>
+                </motion.div>
+              ))}
+              
+              {loading && (
+                <motion.div
+                  initial={{ opacity: 0, x: -100 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="flex justify-start"
+                >
+                  <div className="bg-white/10 px-5 py-3 rounded-2xl rounded-bl-none border border-white/20 backdrop-blur-md">
+                    <div className="flex gap-2">
+                      {[0, 1, 2].map((i) => (
+                        <motion.div
+                          key={i}
+                          animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+                          transition={{ duration: 1.4, delay: i * 0.2, repeat: Infinity }}
+                          className="w-2 h-2 bg-blue-400 rounded-full"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </motion.div>
+          )}
+          <div ref={messagesEndRef} />
+        </motion.div>
+
+        {/* Input Area */}
+        <motion.footer
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="fixed bottom-20 left-0 right-0 bg-gradient-to-t from-slate-900 via-slate-800 to-transparent px-4 py-4 backdrop-blur-xl border-t border-white/10"
+        >
+          <div className="max-w-4xl mx-auto flex gap-3">
+            <input
+              type="text"
+              value={input}
+              onChange={e => {
+                setInput(e.target.value)
+                setError("")
+              }}
+              onKeyDown={e => e.key === "Enter" && !loading && send()}
+              placeholder={`Message ${character.name}...`}
+              className="flex-1 bg-white/10 border border-white/20 backdrop-blur-md rounded-xl px-5 py-3 text-white placeholder-white/50 outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all duration-300"
+              disabled={loading}
+            />
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={send}
+              disabled={loading || !input.trim()}
+              className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 disabled:shadow-none"
+            >
+              {loading ? "..." : "Send"}
+            </motion.button>
+          </div>
+        </motion.footer>
       </div>
-    </div>
+    </PageTransition>
   )
 }

@@ -1,5 +1,8 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { motion } from "framer-motion"
+import Layout from "../components/Layout"
+import PageTransition from "../components/PageTransition"
 
 interface UserProfile {
   username: string
@@ -22,6 +25,7 @@ export default function CreateProfile() {
       ...prev,
       [name]: value
     }))
+    setError("")
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -50,110 +54,128 @@ export default function CreateProfile() {
     navigate("/profile")
   }
 
+  const inputVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: { delay: i * 0.1, duration: 0.5 },
+    }),
+  }
+
   return (
-    <div className="bg-[#8b8070] min-h-screen text-white flex flex-col items-center justify-start">
-      {/* Container */}
-      <div className="w-[400px] flex flex-col h-screen">
-        
-        {/* Header */}
-        <div className="px-4 pt-4 pb-3">
-          <div className="mb-3">
-            <span className="text-2xl">👤</span>
-            <span className="text-xs text-white/70 font-medium ml-2">CREATE PROFILE</span>
-          </div>
-        </div>
+    <PageTransition>
+      <Layout title="👤 Create Profile" subtitle="Set up your user profile">
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="mb-6 bg-red-500/20 border border-red-500/50 rounded-lg px-4 py-3 text-red-300 backdrop-blur-md"
+          >
+            ❌ {error}
+          </motion.div>
+        )}
 
-        {/* Form Content - Scrollable */}
-        <div className="flex-1 overflow-y-auto px-4 pb-24">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Error Message */}
-            {error && (
-              <div className="bg-red-500/20 border border-red-500 text-red-200 px-4 py-2 rounded-lg text-sm">
-                {error}
-              </div>
+        <motion.form
+          onSubmit={handleSubmit}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ staggerChildren: 0.1, delayChildren: 0.2 }}
+          className="space-y-6"
+        >
+          {/* Username Field */}
+          <motion.div
+            custom={0}
+            variants={inputVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <label className="block text-sm font-semibold text-white/80 mb-2">
+              👤 Username
+            </label>
+            <input
+              type="text"
+              name="username"
+              placeholder="Enter your username..."
+              value={formData.username}
+              onChange={handleChange}
+              className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 backdrop-blur-md text-white placeholder-white/50 outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition"
+            />
+          </motion.div>
+
+          {/* Email Field */}
+          <motion.div
+            custom={1}
+            variants={inputVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <label className="block text-sm font-semibold text-white/80 mb-2">
+              📧 Email
+            </label>
+            <input
+              type="email"
+              name="email"
+              placeholder="Enter your email..."
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 backdrop-blur-md text-white placeholder-white/50 outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition"
+            />
+          </motion.div>
+
+          {/* Avatar URL Field */}
+          <motion.div
+            custom={2}
+            variants={inputVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <label className="block text-sm font-semibold text-white/80 mb-2">
+              🖼️ Avatar URL
+            </label>
+            <input
+              type="text"
+              name="avatar"
+              placeholder="https://..."
+              value={formData.avatar}
+              onChange={handleChange}
+              className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 backdrop-blur-md text-white placeholder-white/50 outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition"
+            />
+            {formData.avatar && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="mt-3 rounded-lg overflow-hidden border border-white/20"
+              >
+                <img
+                  src={formData.avatar}
+                  alt="Preview"
+                  className="w-full h-48 object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src =
+                      "https://via.placeholder.com/400x200"
+                  }}
+                />
+              </motion.div>
             )}
+          </motion.div>
 
-            {/* Username Input */}
-            <div>
-              <label className="block text-sm font-medium text-white/80 mb-2">Username</label>
-              <input
-                type="text"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                placeholder="Enter your username"
-                className="w-full px-4 py-3 rounded-xl bg-white/15 text-white placeholder-white/50 outline-none focus:bg-white/25 focus:ring-2 focus:ring-white/30 transition"
-              />
-            </div>
-
-            {/* Email Input */}
-            <div>
-              <label className="block text-sm font-medium text-white/80 mb-2">Email</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="Enter your email"
-                className="w-full px-4 py-3 rounded-xl bg-white/15 text-white placeholder-white/50 outline-none focus:bg-white/25 focus:ring-2 focus:ring-white/30 transition"
-              />
-            </div>
-
-            {/* Avatar URL Input */}
-            <div>
-              <label className="block text-sm font-medium text-white/80 mb-2">Avatar URL</label>
-              <input
-                type="text"
-                name="avatar"
-                value={formData.avatar}
-                onChange={handleChange}
-                placeholder="https://example.com/avatar.jpg"
-                className="w-full px-4 py-3 rounded-xl bg-white/15 text-white placeholder-white/50 outline-none focus:bg-white/25 focus:ring-2 focus:ring-white/30 transition"
-              />
-              {formData.avatar && (
-                <div className="mt-3 flex justify-center">
-                  <img
-                    src={formData.avatar}
-                    alt="preview"
-                    className="w-20 h-20 rounded-xl object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = "https://via.placeholder.com/100?text=Invalid"
-                    }}
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              className="w-full mt-6 px-4 py-3 bg-white/25 hover:bg-white/35 text-white font-semibold rounded-xl transition"
-            >
-              Create Profile
-            </button>
-          </form>
-        </div>
-
-        {/* Bottom Nav */}
-        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-[400px] bg-black/30 backdrop-blur-md rounded-t-3xl px-4 py-3 flex justify-around items-center">
-          <a href="/" className="flex flex-col items-center gap-1 text-white/70 hover:text-white transition group">
-            <span className="text-lg group-hover:scale-125 transition">🏠</span>
-            <span className="text-xs">Home</span>
-          </a>
-          <a href="/create-profile" className="flex flex-col items-center gap-1 text-white hover:text-white transition group">
-            <span className="text-lg group-hover:scale-125 transition">➕</span>
-            <span className="text-xs">Create</span>
-          </a>
-          <a href="/profile" className="flex flex-col items-center gap-1 text-white/70 hover:text-white transition group">
-            <span className="text-lg group-hover:scale-125 transition">❤️</span>
-            <span className="text-xs">Favorites</span>
-          </a>
-          <a href="/profile" className="flex flex-col items-center gap-1 text-white/70 hover:text-white transition group">
-            <span className="text-lg group-hover:scale-125 transition">👤</span>
-            <span className="text-xs">Profile</span>
-          </a>
-        </div>
-      </div>
-    </div>
+          {/* Submit Button */}
+          <motion.button
+            custom={3}
+            variants={inputVariants}
+            initial="hidden"
+            animate="visible"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            type="submit"
+            className="w-full py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold rounded-lg transition-all duration-300 shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50"
+          >
+            ✨ Create Profile
+          </motion.button>
+        </motion.form>
+      </Layout>
+    </PageTransition>
   )
 }

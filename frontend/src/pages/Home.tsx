@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react"
-import { Link, useLocation } from "react-router-dom"
+import { Link } from "react-router-dom"
+import { motion } from "framer-motion"
 import axios from "axios"
+import Layout from "../components/Layout"
+import PageTransition from "../components/PageTransition"
 
 export default function Home() {
   const [characters, setCharacters] = useState<any[]>([])
   const [filteredCharacters, setFilteredCharacters] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
-  const location = useLocation()
 
   useEffect(() => {
     axios
@@ -33,115 +35,155 @@ export default function Home() {
     setFilteredCharacters(filtered)
   }
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      },
+    },
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5 },
+    },
+  }
+
   return (
-    <div className="bg-gradient-to-br from-[#a89f91] via-[#9c927f] to-[#8b8070] min-h-screen text-white flex justify-center">
-      
-      {/* 📱 Main Container */}
-      <div className="w-[400px] min-h-screen bg-white/10 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl flex flex-col">
-
-        {/* 🔝 Header */}
-        <div className="px-4 pt-5 pb-3">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">🔥</span>
-              <span className="text-sm font-semibold tracking-wide text-white/80">
-                CHARACTERS
-              </span>
-            </div>
-          </div>
-
-          {/* 🔍 Search */}
+    <PageTransition>
+      <Layout title="🔥 Characters" subtitle="Select a character to chat with">
+        {/* Search Bar */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="mb-8"
+        >
           <input
             type="text"
             placeholder="Search characters..."
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
-            className="w-full px-4 py-2 rounded-full bg-white/20 backdrop-blur-md text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/30 transition text-sm"
+            className="w-full px-6 py-3 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white placeholder-white/50 outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition duration-300"
           />
-        </div>
+        </motion.div>
 
-        {/* 📦 Content */}
-        <div className="flex-1 overflow-y-auto px-4 pb-32">
-          {loading ? (
-            <div className="flex justify-center items-center h-full">
-              <div className="flex flex-col items-center gap-3">
-                <div className="w-10 h-10 border-4 border-white/20 border-t-white animate-spin rounded-full" />
-                <p className="text-white/60 text-sm">Loading...</p>
-              </div>
+        {/* Characters Grid */}
+        {loading ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex justify-center items-center py-20"
+          >
+            <div className="flex flex-col items-center gap-4">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                className="w-12 h-12 border-4 border-white/20 border-t-blue-500 rounded-full"
+              />
+              <p className="text-white/60">Loading characters...</p>
             </div>
-          ) : filteredCharacters.length === 0 ? (
-            <div className="flex justify-center items-center h-full">
-              <p className="text-white/60">No characters found</p>
+          </motion.div>
+        ) : filteredCharacters.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex justify-center items-center py-20"
+          >
+            <div className="text-center">
+              <p className="text-white/60 text-lg">😕 No characters found</p>
+              <p className="text-white/40 text-sm mt-2">Try a different search</p>
             </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-3">
-              {filteredCharacters.map((c: any) => (
+          </motion.div>
+        ) : (
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {filteredCharacters.map((character: any) => (
+              <motion.div
+                key={character.id}
+                variants={itemVariants}
+                whileHover={{ scale: 1.05, y: -5 }}
+                whileTap={{ scale: 0.95 }}
+              >
                 <Link
-                  to={`/chat/${c.id}`}
-                  key={c.id}
-                  className="group"
+                  to={`/chat/${character.id}`}
+                  className="block h-full group"
                 >
-                  <div className="bg-white/10 backdrop-blur-md rounded-2xl overflow-hidden border border-white/10 shadow-lg hover:shadow-2xl hover:scale-[1.03] transition duration-300">
-                    
-                    {/* 🖼 Image */}
-                    <div className="relative w-full h-[170px] overflow-hidden">
-                      <img
-                        src={c.avatar || `https://via.placeholder.com/300x300?text=${c.name}`}
-                        alt={c.name}
+                  <div className="h-full bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md rounded-2xl overflow-hidden border border-white/10 shadow-xl hover:shadow-2xl hover:border-blue-500/50 transition duration-300 flex flex-col">
+                    {/* Image Container */}
+                    <div className="relative w-full h-64 overflow-hidden bg-gradient-to-br from-blue-900/20 to-purple-900/20">
+                      <motion.img
+                        src={character.avatar || `https://via.placeholder.com/400x300?text=${character.name}`}
+                        alt={character.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
 
-                      {/* 🔞 Badge */}
-                      {c.isNSFW && (
-                        <div className="absolute top-2 right-2 bg-red-600/90 text-white text-xs px-2 py-1 rounded-full">
-                          18+
+                      {/* Badge */}
+                      <motion.div
+                        initial={{ scale: 0, rotate: -180 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        transition={{ type: "spring", delay: 0.2 }}
+                        className="absolute top-3 right-3"
+                      >
+                        {character.isNSFW && (
+                          <div className="bg-red-600/90 text-white text-xs px-3 py-1 rounded-full font-semibold backdrop-blur-md border border-red-400/30">
+                            18+
+                          </div>
+                        )}
+                      </motion.div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 p-5 flex flex-col justify-between">
+                      <div>
+                        <h3 className="font-bold text-lg text-white line-clamp-1 group-hover:text-blue-400 transition">
+                          {character.name}
+                        </h3>
+                        <p className="text-white/70 text-sm mt-2 line-clamp-2">
+                          {character.description}
+                        </p>
+                      </div>
+
+                      {/* Tags */}
+                      {character.tags && (
+                        <div className="flex flex-wrap gap-2 mt-4">
+                          {character.tags.split(",").slice(0, 2).map((tag: string, idx: number) => (
+                            <span
+                              key={idx}
+                              className="text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded-full border border-blue-500/30"
+                            >
+                              {tag.trim()}
+                            </span>
+                          ))}
                         </div>
                       )}
-                    </div>
 
-                    {/* 📝 Info */}
-                    <div className="p-3">
-                      <h3 className="font-semibold text-sm tracking-wide line-clamp-1">
-                        {c.name}
-                      </h3>
-                      <p className="text-xs text-white/70 line-clamp-1">
-                        {c.description}
-                      </p>
+                      {/* CTA Button */}
+                      <motion.button
+                        whileHover={{ x: 5 }}
+                        className="mt-4 w-full py-2 bg-gradient-to-r from-blue-600/80 to-cyan-600/80 hover:from-blue-500 hover:to-cyan-500 text-white rounded-lg font-semibold text-sm transition duration-300"
+                      >
+                        Start Chat →
+                      </motion.button>
                     </div>
-
                   </div>
                 </Link>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* 🔻 Bottom Nav */}
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[360px] bg-white/10 backdrop-blur-xl border border-white/10 rounded-2xl px-4 py-3 flex justify-around items-center shadow-xl">
-
-          <Link to="/" className={`flex flex-col items-center text-xs ${location.pathname === "/" ? "text-white" : "text-white/50"}`}>
-            <span className="text-lg">🏠</span>
-            Home
-          </Link>
-
-          <Link to="/create-character" className={`flex flex-col items-center text-xs ${location.pathname === "/create-character" ? "text-white" : "text-white/50"}`}>
-            <span className="text-lg">➕</span>
-            Create
-          </Link>
-
-          <button className="flex flex-col items-center text-xs text-white/50">
-            <span className="text-lg">❤️</span>
-            Fav
-          </button>
-
-          <Link to="/profile" className={`flex flex-col items-center text-xs ${location.pathname === "/profile" ? "text-white" : "text-white/50"}`}>
-            <span className="text-lg">👤</span>
-            Profile
-          </Link>
-
-        </div>
-      </div>
-    </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
+      </Layout>
+    </PageTransition>
   )
 }

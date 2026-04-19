@@ -1,6 +1,9 @@
 import { useState } from "react"
+import { motion } from "framer-motion"
 import axios from "axios"
 import { useNavigate } from "react-router-dom"
+import Layout from "../components/Layout"
+import PageTransition from "../components/PageTransition"
 
 const API = "http://localhost:5000"
 
@@ -48,153 +51,214 @@ export default function CreateCharacter() {
 
     setLoading(true)
     try {
-      await axios.post(`${API}/character`, form)
-      alert("✅ สร้างตัวละครสำเร็จ!")
+      const res = await axios.post(`${API}/character`, form)
+      console.log("✅ Character created:", res.data)
       navigate("/")
     } catch (err: any) {
-      console.error(err)
-      setError(err.response?.data?.error || "❌ เกิดข้อผิดพลาด")
+      setError(err.response?.data?.error || "Failed to create character")
+      console.error("❌ Error:", err)
     } finally {
       setLoading(false)
     }
   }
 
+  const inputVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: { delay: i * 0.1, duration: 0.5 },
+    }),
+  }
+
   return (
-    <div className="min-h-screen bg-black text-white p-4">
+    <PageTransition>
+      <Layout title="➕ Create Character" subtitle="Design a new AI character">
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="mb-6 bg-red-500/20 border border-red-500/50 rounded-lg px-4 py-3 text-red-300 backdrop-blur-md"
+          >
+            ❌ {error}
+          </motion.div>
+        )}
 
-      {/* 🔥 Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">✨ Create Character</h1>
-
-        <button
-          onClick={() => navigate("/")}
-          className="text-gray-400 hover:text-purple-400 transition text-2xl"
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ staggerChildren: 0.1, delayChildren: 0.2 }}
+          className="space-y-5"
         >
-          ←
-        </button>
-      </div>
-
-      {error && (
-        <div className="mb-4 p-4 bg-red-900/50 border border-red-500 rounded-lg text-red-200">
-          {error}
-        </div>
-      )}
-
-      <div className="grid md:grid-cols-2 gap-6">
-
-        {/* 🧾 FORM */}
-        <div className="flex flex-col gap-3">
-
-          <input
-            placeholder="Name"
-            value={form.name}
-            className="p-3 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition"
-            onChange={(e) => handleChange("name", e.target.value)}
-            disabled={loading}
-          />
-
-          <input
-            placeholder="Avatar URL"
-            value={form.avatar}
-            className="p-3 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition"
-            onChange={(e) => handleChange("avatar", e.target.value)}
-            disabled={loading}
-          />
-
-          <textarea
-            placeholder="Description"
-            value={form.description}
-            className="p-3 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition resize-none"
-            rows={3}
-            onChange={(e) => handleChange("description", e.target.value)}
-            disabled={loading}
-          />
-
-          <textarea
-            placeholder="Personality"
-            value={form.personality}
-            className="p-3 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition resize-none"
-            rows={3}
-            onChange={(e) => handleChange("personality", e.target.value)}
-            disabled={loading}
-          />
-
-          <textarea
-            placeholder="Scenario"
-            value={form.scenario}
-            className="p-3 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition resize-none"
-            rows={3}
-            onChange={(e) => handleChange("scenario", e.target.value)}
-            disabled={loading}
-          />
-
-          <input
-            placeholder="Tags (romance, horror...)"
-            value={form.tags}
-            className="p-3 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition"
-            onChange={(e) => handleChange("tags", e.target.value)}
-            disabled={loading}
-          />
-
-          {/* 🔞 NSFW */}
-          <label className="flex items-center gap-2 cursor-pointer">
+          {/* Name Field */}
+          <motion.div
+            custom={0}
+            variants={inputVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <label className="block text-sm font-semibold text-white/80 mb-2">
+              🎭 Character Name
+            </label>
             <input
-              type="checkbox"
-              checked={form.isNSFW}
-              onChange={(e) => handleChange("isNSFW", e.target.checked)}
-              disabled={loading}
-              className="w-4 h-4"
+              type="text"
+              placeholder="Enter character name..."
+              value={form.name}
+              onChange={e => handleChange("name", e.target.value)}
+              className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 backdrop-blur-md text-white placeholder-white/50 outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition"
             />
-            <span>🔞 NSFW Content</span>
-          </label>
+          </motion.div>
 
-          {/* 🚀 Submit */}
-          <button
+          {/* Description Field */}
+          <motion.div
+            custom={1}
+            variants={inputVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <label className="block text-sm font-semibold text-white/80 mb-2">
+              📝 Description
+            </label>
+            <textarea
+              placeholder="Brief description of the character..."
+              value={form.description}
+              onChange={e => handleChange("description", e.target.value)}
+              rows={3}
+              className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 backdrop-blur-md text-white placeholder-white/50 outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition resize-none"
+            />
+          </motion.div>
+
+          {/* Personality Field */}
+          <motion.div
+            custom={2}
+            variants={inputVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <label className="block text-sm font-semibold text-white/80 mb-2">
+              🧠 Personality
+            </label>
+            <textarea
+              placeholder="How does this character behave and think?"
+              value={form.personality}
+              onChange={e => handleChange("personality", e.target.value)}
+              rows={3}
+              className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 backdrop-blur-md text-white placeholder-white/50 outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition resize-none"
+            />
+          </motion.div>
+
+          {/* Scenario Field */}
+          <motion.div
+            custom={3}
+            variants={inputVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <label className="block text-sm font-semibold text-white/80 mb-2">
+              🎬 Scenario
+            </label>
+            <textarea
+              placeholder="What's the setting and context?"
+              value={form.scenario}
+              onChange={e => handleChange("scenario", e.target.value)}
+              rows={3}
+              className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 backdrop-blur-md text-white placeholder-white/50 outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition resize-none"
+            />
+          </motion.div>
+
+          {/* Avatar URL Field */}
+          <motion.div
+            custom={4}
+            variants={inputVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <label className="block text-sm font-semibold text-white/80 mb-2">
+              🖼️ Avatar URL
+            </label>
+            <input
+              type="text"
+              placeholder="https://..."
+              value={form.avatar}
+              onChange={e => handleChange("avatar", e.target.value)}
+              className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 backdrop-blur-md text-white placeholder-white/50 outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition"
+            />
+            {form.avatar && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="mt-3 rounded-lg overflow-hidden border border-white/20"
+              >
+                <img
+                  src={form.avatar}
+                  alt="Preview"
+                  className="w-full h-48 object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src =
+                      "https://via.placeholder.com/400x200"
+                  }}
+                />
+              </motion.div>
+            )}
+          </motion.div>
+
+          {/* Tags Field */}
+          <motion.div
+            custom={5}
+            variants={inputVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <label className="block text-sm font-semibold text-white/80 mb-2">
+              🏷️ Tags (comma-separated)
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. friendly, fantasy, developer..."
+              value={form.tags}
+              onChange={e => handleChange("tags", e.target.value)}
+              className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 backdrop-blur-md text-white placeholder-white/50 outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition"
+            />
+          </motion.div>
+
+          {/* NSFW Toggle */}
+          <motion.div
+            custom={6}
+            variants={inputVariants}
+            initial="hidden"
+            animate="visible"
+            className="flex items-center gap-4 bg-white/5 border border-white/10 rounded-lg p-4 backdrop-blur-md"
+          >
+            <label className="flex items-center gap-3 cursor-pointer flex-1">
+              <input
+                type="checkbox"
+                checked={form.isNSFW}
+                onChange={e => handleChange("isNSFW", e.target.checked)}
+                className="w-5 h-5 rounded accent-blue-500 cursor-pointer"
+              />
+              <span className="font-semibold text-white/80">
+                🔞 Mark as NSFW
+              </span>
+            </label>
+          </motion.div>
+
+          {/* Submit Button */}
+          <motion.button
+            custom={7}
+            variants={inputVariants}
+            initial="hidden"
+            animate="visible"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={submit}
             disabled={loading}
-            className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 disabled:from-gray-700 disabled:to-gray-700 text-white p-3 rounded-lg font-semibold transition-all duration-200 shadow-lg shadow-purple-500/30 hover:shadow-lg hover:shadow-purple-500/50 disabled:shadow-none mt-4"
+            className="w-full py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed text-white font-bold rounded-lg transition-all duration-300 shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50"
           >
             {loading ? "Creating..." : "✨ Create Character"}
-          </button>
-        </div>
-
-        {/* 👁 Preview */}
-        <div className="bg-gradient-to-b from-zinc-800 to-zinc-900 rounded-2xl p-4 border border-zinc-700 shadow-lg">
-
-          <img
-            src={form.avatar || "https://via.placeholder.com/300x400"}
-            alt="preview"
-            className="w-full h-56 object-cover rounded-xl mb-3 border border-zinc-600"
-          />
-
-          <h2 className="text-lg font-bold mb-2">
-            {form.name || "Character Name"}
-          </h2>
-
-          <p className="text-gray-300 text-sm mb-3">
-            {form.description || "Description..."}
-          </p>
-
-          <div className="mb-3 p-3 bg-zinc-800/50 rounded border border-zinc-600">
-            <p className="text-xs text-gray-400 mb-1">Personality:</p>
-            <p className="text-sm text-purple-300">{form.personality || "Personality traits..."}</p>
-          </div>
-
-          <div className="mb-3 p-3 bg-zinc-800/50 rounded border border-zinc-600">
-            <p className="text-xs text-gray-400 mb-1">Scenario:</p>
-            <p className="text-sm text-purple-300">{form.scenario || "Scenario..."}</p>
-          </div>
-
-          <p className="text-xs text-blue-400 mb-2">
-            #{form.tags || "tags"}
-          </p>
-
-          {form.isNSFW && (
-            <span className="inline-block text-red-400 text-xs bg-red-900/30 px-2 py-1 rounded border border-red-500">🔞 NSFW</span>
-          )}
-        </div>
-
-      </div>
-    </div>
+          </motion.button>
+        </motion.div>
+      </Layout>
+    </PageTransition>
   )
 }
