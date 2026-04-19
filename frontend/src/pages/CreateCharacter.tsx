@@ -73,7 +73,7 @@ export default function CreateCharacter() {
 
   return (
     <PageTransition>
-      <Layout title="➕ Create Character" subtitle="Design a new AI character">
+      <Layout title="➕ สร้างตัวละคร" subtitle="ออกแบบตัวละครเทพ AI ของคุณเอง">
         {error && (
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -99,11 +99,11 @@ export default function CreateCharacter() {
             animate="visible"
           >
             <label className="block text-sm font-semibold text-white/80 mb-2">
-              🎭 Character Name
+              🎭 ชื่อตัวละคร
             </label>
             <input
               type="text"
-              placeholder="Enter character name..."
+              placeholder="ใส่ชื่อตัวละคร..."
               value={form.name}
               onChange={e => handleChange("name", e.target.value)}
               className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 backdrop-blur-md text-white placeholder-white/50 outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition"
@@ -118,10 +118,10 @@ export default function CreateCharacter() {
             animate="visible"
           >
             <label className="block text-sm font-semibold text-white/80 mb-2">
-              📝 Description
+              📝 คำอธิบาย
             </label>
             <textarea
-              placeholder="Brief description of the character..."
+              placeholder="คำอธิบายสั้น ๆ เกี่ยวกับตัวละคร..."
               value={form.description}
               onChange={e => handleChange("description", e.target.value)}
               rows={3}
@@ -137,10 +137,10 @@ export default function CreateCharacter() {
             animate="visible"
           >
             <label className="block text-sm font-semibold text-white/80 mb-2">
-              🧠 Personality
+              🧠 บุคลิกภาพ
             </label>
             <textarea
-              placeholder="How does this character behave and think?"
+              placeholder="ตัวละครนี้ประพฤติตัวและคิดอย่างไร?"
               value={form.personality}
               onChange={e => handleChange("personality", e.target.value)}
               rows={3}
@@ -156,10 +156,10 @@ export default function CreateCharacter() {
             animate="visible"
           >
             <label className="block text-sm font-semibold text-white/80 mb-2">
-              🎬 Scenario
+              🎬 สถานการณ์
             </label>
             <textarea
-              placeholder="What's the setting and context?"
+              placeholder="สถานที่และบริบทเป็นอย่างไร?"
               value={form.scenario}
               onChange={e => handleChange("scenario", e.target.value)}
               rows={3}
@@ -175,7 +175,7 @@ export default function CreateCharacter() {
             animate="visible"
           >
             <label className="block text-sm font-semibold text-white/80 mb-2">
-              🖼️ Avatar URL
+              🖼️ URL รูปภาพ
             </label>
             <input
               type="text"
@@ -211,11 +211,11 @@ export default function CreateCharacter() {
             animate="visible"
           >
             <label className="block text-sm font-semibold text-white/80 mb-2">
-              🏷️ Tags (comma-separated)
+              🏷️ แท็ก (คั่นด้วยจุลภาค)
             </label>
             <input
               type="text"
-              placeholder="e.g. friendly, fantasy, developer..."
+              placeholder="เช่น ใจดี, นิยายเก่า, นักพัฒนา..."
               value={form.tags}
               onChange={e => handleChange("tags", e.target.value)}
               className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 backdrop-blur-md text-white placeholder-white/50 outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition"
@@ -238,7 +238,7 @@ export default function CreateCharacter() {
                 className="w-5 h-5 rounded accent-blue-500 cursor-pointer"
               />
               <span className="font-semibold text-white/80">
-                🔞 Mark as NSFW
+                🔞 ทำเครื่องหมายว่า NSFW
               </span>
             </label>
           </motion.div>
@@ -255,7 +255,7 @@ export default function CreateCharacter() {
             disabled={loading}
             className="w-full py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed text-white font-bold rounded-lg transition-all duration-300 shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50"
           >
-            {loading ? "Creating..." : "✨ Create Character"}
+            {loading ? "กำลังสร้าง..." : "✨ สร้างตัวละคร"}
           </motion.button>
         </motion.div>
       </Layout>

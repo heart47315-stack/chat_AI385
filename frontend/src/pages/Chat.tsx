@@ -44,29 +44,33 @@ export default function Chat() {
 
   useEffect(() => {
     if (id) {
-      console.log("📖 Loading character with ID:", id)
-      
-      // Fetch character from all characters list
+      console.log("📖 โหลดตัวละครด้วย ID:", id)
+
+      // ดึงตัวละครจาก API
       axios
         .get(`${API_BASE_URL}/character`)
         .then(res => {
+          console.log("📋 ได้ตัวละครทั้งหมด:", res.data.length, "ตัว")
+          console.log("🔍 ค้นหา character ID:", id)
+
           const char = res.data.find((c: Character) => c.id === id)
           if (char) {
+            console.log("✅ พบตัวละคร:", char.name, "- ID:", char.id)
             setCharacter(char)
-            console.log("✅ Character loaded:", char.name)
           } else {
-            console.error("❌ Character not found in list:", id)
-            setError("Character not found")
+            console.error("❌ ไม่พบตัวละครด้วย ID:", id)
+            console.error("IDs ที่มี:", res.data.map((c: any) => c.id))
+            setError("ไม่พบตัวละคร")
           }
         })
         .catch(err => {
-          console.error("❌ Failed to fetch character:", err.message)
-          setError("Failed to load character - Backend connection error")
+          console.error("❌ ดึงตัวละครล้มเหลว:", err.message)
+          setError("ล้มเหลวในการโหลดตัวละคร - ไม่มีการเชื่อมต่อ Backend")
         })
         .finally(() => setCharacterLoading(false))
 
-      // Fetch message history
-      console.log("📋 Loading message history for character:", id)
+      // ดึงประวัติข้อความ
+      console.log("📋 โหลดประวัติข้อความสำหรับ:", id)
       axios
         .get(`${API_BASE_URL}/chat?characterId=${id}`)
         .then(res => {
@@ -76,38 +80,44 @@ export default function Chat() {
               content: m.content
             }))
             setMessages(msgs)
-            console.log("📋 Loaded", msgs.length, "messages")
+            console.log("📋 โหลด", msgs.length, "ข้อความ")
           }
         })
         .catch(err => {
-          console.warn("⚠️ Failed to load message history:", err.message)
-          // Don't set error for message history - it's optional
+          console.warn("⚠️ ล้มเหลวในการโหลดประวัติข้อความ:", err.message)
         })
     }
   }, [id])
 
   const send = async () => {
+    console.log("🔍 send() called, input:", input.trim())
+
     if (!input.trim()) {
-      console.log("⚠️ Empty message")
+      console.log("⚠️ ข้อความว่าง")
       return
     }
 
     if (!id) {
-      setError("❌ Character ID is missing")
-      console.error("❌ Character ID is undefined:", id)
+      setError("❌ Character ID หายไป")
+      console.error("❌ Character ID undefined:", id)
       return
     }
 
+    console.log("📝 เตรียมส่ง:", { message: input, characterId: id })
     setLoading(true)
     setError("")
+
     const userMessage: Message = { role: "user", content: input }
     setMessages(prev => [...prev, userMessage])
     const currentInput = input
     setInput("")
 
-    console.log("📤 Sending message:", { message: currentInput, characterId: id, url: `${API_BASE_URL}/chat` })
+    console.log("📤 ส่งไป API:", { message: currentInput, characterId: id, url: `${API_BASE_URL}/chat` })
 
     try {
+      console.log("🌐 POST ไปที่:", `${API_BASE_URL}/chat`)
+      console.log("📦 ข้อมูลขออ:", { message: currentInput, characterId: id })
+      
       const res = await axios.post(`${API_BASE_URL}/chat`, {
         message: currentInput,
         characterId: id
@@ -115,16 +125,29 @@ export default function Chat() {
         timeout: 30000
       })
 
-      console.log("📥 Server response:", res.data)
+      console.log("📥 Full response:", res)
+      console.log("📥 res.data:", res.data)
+      console.log("📥 reply field:", res.data.reply)
+      console.log("📥 reply type:", typeof res.data.reply)
+
+      if (!res.data || !res.data.reply) {
+        console.error("❌ Response structure:", res.data)
+        throw new Error("ไม่มี reply field ในการตอบกลับ")
+      }
 
       const aiMessage: Message = { role: "ai", content: res.data.reply }
       setMessages(prev => [...prev, aiMessage])
+      console.log("✅ เพิ่มข้อความ AI สำเร็จ")
     } catch (err: any) {
-      console.error("❌ Failed to send message:", err.message)
+      console.error("❌ ส่งข้อความล้มเหลว:", err.message)
       console.error("Error response:", err.response?.data)
       console.error("Error status:", err.response?.status)
-      
-      setError(err.response?.data?.error || err.message || "Failed to send message")
+      console.error("Full error:", err)
+
+      const errorMsg = err.response?.data?.error || err.message || "ส่งข้อความล้มเหลว"
+      setError(`❌ ${errorMsg}`)
+
+      // ลบข้อความ user ที่เพิ่ง add
       setMessages(prev => prev.filter((_, i) => i !== prev.length - 1))
     } finally {
       setLoading(false)
@@ -156,7 +179,7 @@ export default function Chat() {
           >
             ❌
           </motion.div>
-          <h1 className="text-2xl font-bold mb-2">Character Not Found</h1>
+          <h1 className="text-2xl font-bold mb-2">❌ ไม่พบตัวละคร</h1>
           <p className="text-white/60 mb-6">{error}</p>
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -164,7 +187,7 @@ export default function Chat() {
             onClick={() => navigate("/")}
             className="bg-blue-600 hover:bg-blue-500 px-6 py-3 rounded-lg font-semibold transition"
           >
-            ← Back to Characters
+            ← กลับไปหน้าตัวละคร
           </motion.button>
         </div>
       </PageTransition>
@@ -226,7 +249,7 @@ export default function Chat() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="flex-1 overflow-y-auto px-4 py-6 max-w-4xl mx-auto w-full"
+          className="flex-1 overflow-y-auto px-4 py-6 max-w-4xl mx-auto w-full pb-32"
         >
           {messages.length === 0 ? (
             <motion.div
@@ -241,14 +264,14 @@ export default function Chat() {
               >
                 💬
               </motion.div>
-              <p className="text-xl font-semibold">Start a conversation with {character.name}</p>
+              <p className="text-xl font-semibold">พูดคุยกับ {character.name}</p>
               <p className="text-white/60 text-sm mt-3 max-w-sm">{character.personality}</p>
             </motion.div>
           ) : (
             <motion.div className="space-y-4">
               {messages.map((msg, i) => (
                 <motion.div
-                  key={i}
+                  key={`${msg.role}-${i}-${msg.content.slice(0, 10)}`}
                   initial={{ opacity: 0, x: msg.role === "user" ? 100 : -100 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3 }}
@@ -256,17 +279,16 @@ export default function Chat() {
                 >
                   <motion.div
                     whileHover={{ scale: 1.02 }}
-                    className={`max-w-xs sm:max-w-md lg:max-w-lg px-5 py-3 rounded-2xl backdrop-blur-md transition-all ${
-                      msg.role === "user"
-                        ? "bg-gradient-to-r from-blue-600/80 to-cyan-600/80 text-white rounded-br-none border border-blue-500/30 shadow-lg shadow-blue-500/20"
-                        : "bg-white/10 text-white/90 rounded-bl-none border border-white/20 shadow-lg shadow-black/20"
-                    }`}
+                    className={`max-w-xs sm:max-w-md lg:max-w-lg px-5 py-3 rounded-2xl backdrop-blur-md transition-all ${msg.role === "user"
+                      ? "bg-gradient-to-r from-blue-600/80 to-cyan-600/80 text-white rounded-br-none border border-blue-500/30 shadow-lg shadow-blue-500/20"
+                      : "bg-white/10 text-white/90 rounded-bl-none border border-white/20 shadow-lg shadow-black/20"
+                      }`}
                   >
                     <p className="text-sm md:text-base leading-relaxed">{msg.content}</p>
                   </motion.div>
                 </motion.div>
               ))}
-              
+
               {loading && (
                 <motion.div
                   initial={{ opacity: 0, x: -100 }}
@@ -297,29 +319,39 @@ export default function Chat() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="fixed bottom-20 left-0 right-0 bg-gradient-to-t from-slate-900 via-slate-800 to-transparent px-4 py-4 backdrop-blur-xl border-t border-white/10"
+          className="fixed bottom-0 left-0 right-0 z-40 bg-gradient-to-t from-slate-900 via-slate-800 to-transparent px-4 py-4 backdrop-blur-xl border-t border-white/10"
         >
           <div className="max-w-4xl mx-auto flex gap-3">
             <input
               type="text"
               value={input}
               onChange={e => {
+                console.log("⌨️ ตัวอักษรใหม่:", e.target.value)
                 setInput(e.target.value)
                 setError("")
               }}
-              onKeyDown={e => e.key === "Enter" && !loading && send()}
-              placeholder={`Message ${character.name}...`}
+              onKeyDown={e => {
+                console.log("⌨️ keydown event:", e.key)
+                if (e.key === "Enter" && !loading) {
+                  console.log("🚀 Enter pressed, sending...")
+                  send()
+                }
+              }}
+              placeholder={`ส่งข้อความไปยัง ${character.name}...`}
               className="flex-1 bg-white/10 border border-white/20 backdrop-blur-md rounded-xl px-5 py-3 text-white placeholder-white/50 outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all duration-300"
               disabled={loading}
             />
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={send}
+              onClick={() => {
+                console.log("🖱️ ปุ่มส่งถูกกด, loading:", loading, "input:", input.trim())
+                send()
+              }}
               disabled={loading || !input.trim()}
               className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 disabled:shadow-none"
             >
-              {loading ? "..." : "Send"}
+              {loading ? "⏳ รอ..." : "📤 ส่ง"}
             </motion.button>
           </div>
         </motion.footer>

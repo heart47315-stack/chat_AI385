@@ -21,6 +21,7 @@ app.use(express.urlencoded({ limit: "50mb" }))
 
 // 🔥 Serve static files FIRST - images, public assets
 app.use("/public", express.static(path.join(__dirname, "../public")))
+app.use("/images", express.static(path.join(__dirname, "../public/images")))
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")))
 
 // Health check with data verification

@@ -99,7 +99,7 @@ router.post("/", async (req: Request<{}, {}, CreateCharacterRequest>, res: Respo
         description,
         personality,
         scenario,
-        avatar: avatar || "https://via.placeholder.com/400x300?text=" + encodeURIComponent(name),
+        avatar: avatar || `https://via.placeholder.com/400x300?text=${encodeURIComponent(name)}`,
         tags: tags || "",
         isNSFW: isNSFW || false
       }

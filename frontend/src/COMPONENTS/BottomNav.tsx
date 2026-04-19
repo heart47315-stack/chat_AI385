@@ -2,10 +2,10 @@ import { Link, useLocation } from "react-router-dom"
 import { motion } from "framer-motion"
 
 const navItems = [
-  { icon: "🏠", label: "Home", path: "/" },
-  { icon: "💬", label: "Chat", path: "/chat/1" }, // Default chat
-  { icon: "➕", label: "Create", path: "/create-character" },
-  { icon: "👤", label: "Profile", path: "/profile" },
+  { icon: "🏠", label: "หน้าหลัก", path: "/" },
+  { icon: "💬", label: "แชท", path: "/" }, // กลับไปหน้าแรก เลือกตัวละครก่อน
+  { icon: "➕", label: "สร้าง", path: "/create-character" },
+  { icon: "👤", label: "โปรไฟล์", path: "/profile" },
 ]
 
 export default function BottomNav() {
@@ -21,7 +21,7 @@ export default function BottomNav() {
       <div className="max-w-full mx-auto px-4">
         <div className="flex justify-around items-center h-20">
           {navItems.map((item) => {
-            const isActive = location.pathname === item.path || 
+            const isActive = location.pathname === item.path ||
               (item.path !== "/" && location.pathname.startsWith(item.path))
 
             return (
@@ -43,14 +43,12 @@ export default function BottomNav() {
                 <motion.div
                   whileHover={{ scale: 1.2 }}
                   whileTap={{ scale: 0.95 }}
-                  className={`flex flex-col items-center gap-1 relative z-10 transition-colors duration-300 ${
-                    isActive ? "text-blue-400" : "text-white/60 group-hover:text-white/80"
-                  }`}
+                  className={`flex flex-col items-center gap-1 relative z-10 transition-colors duration-300 ${isActive ? "text-blue-400" : "text-white/60 group-hover:text-white/80"
+                    }`}
                 >
                   <span className="text-2xl">{item.icon}</span>
-                  <span className={`text-xs font-medium tracking-tight ${
-                    isActive ? "text-blue-400" : "text-white/60"
-                  }`}>
+                  <span className={`text-xs font-medium tracking-tight ${isActive ? "text-blue-400" : "text-white/60"
+                    }`}>
                     {item.label}
                   </span>
                 </motion.div>
