@@ -4,6 +4,8 @@ import { motion } from "framer-motion"
 import axios from "axios"
 import PageTransition from "../components/PageTransition"
 
+const API_BASE_URL = "http://localhost:5000"
+
 interface Message {
   role: "user" | "ai"
   content: string
@@ -26,11 +28,12 @@ export default function Chat() {
   const [character, setCharacter] = useState<Character | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [characterLoading, setCharacterLoading] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     axios
-      .post("http://localhost:5000/test", { test: "connection" })
+      .post(`${API_BASE_URL}/test`, { test: "connection" })
       .then(() => console.log("✅ API connection test passed"))
       .catch(err => console.error("❌ API connection test failed:", err.message))
   }, [])
@@ -41,24 +44,31 @@ export default function Chat() {
 
   useEffect(() => {
     if (id) {
+      console.log("📖 Loading character with ID:", id)
+      
+      // Fetch character from all characters list
       axios
-        .get(`http://localhost:5000/character`)
+        .get(`${API_BASE_URL}/character`)
         .then(res => {
           const char = res.data.find((c: Character) => c.id === id)
           if (char) {
             setCharacter(char)
-            console.log("✅ Character loaded:", char)
+            console.log("✅ Character loaded:", char.name)
           } else {
+            console.error("❌ Character not found in list:", id)
             setError("Character not found")
           }
         })
         .catch(err => {
-          console.error("❌ Failed to fetch character:", err)
+          console.error("❌ Failed to fetch character:", err.message)
           setError("Failed to load character - Backend connection error")
         })
+        .finally(() => setCharacterLoading(false))
 
+      // Fetch message history
+      console.log("📋 Loading message history for character:", id)
       axios
-        .get(`http://localhost:5000/chat?characterId=${id}`)
+        .get(`${API_BASE_URL}/chat?characterId=${id}`)
         .then(res => {
           if (res.data && Array.isArray(res.data)) {
             const msgs: Message[] = res.data.map((m: any) => ({
@@ -70,7 +80,8 @@ export default function Chat() {
           }
         })
         .catch(err => {
-          console.error("⚠️ Failed to load message history:", err.message)
+          console.warn("⚠️ Failed to load message history:", err.message)
+          // Don't set error for message history - it's optional
         })
     }
   }, [id])
@@ -94,12 +105,14 @@ export default function Chat() {
     const currentInput = input
     setInput("")
 
-    console.log("📤 Sending message:", { message: currentInput, characterId: id })
+    console.log("📤 Sending message:", { message: currentInput, characterId: id, url: `${API_BASE_URL}/chat` })
 
     try {
-      const res = await axios.post("http://localhost:5000/chat", {
+      const res = await axios.post(`${API_BASE_URL}/chat`, {
         message: currentInput,
         characterId: id
+      }, {
+        timeout: 30000
       })
 
       console.log("📥 Server response:", res.data)
@@ -107,7 +120,7 @@ export default function Chat() {
       const aiMessage: Message = { role: "ai", content: res.data.reply }
       setMessages(prev => [...prev, aiMessage])
     } catch (err: any) {
-      console.error("❌ Failed to send message:", err)
+      console.error("❌ Failed to send message:", err.message)
       console.error("Error response:", err.response?.data)
       console.error("Error status:", err.response?.status)
       
@@ -118,7 +131,7 @@ export default function Chat() {
     }
   }
 
-  if (!character) {
+  if (characterLoading) {
     return (
       <PageTransition>
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
@@ -127,6 +140,32 @@ export default function Chat() {
             transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
             className="w-16 h-16 border-4 border-white/20 border-t-blue-500 rounded-full"
           />
+        </div>
+      </PageTransition>
+    )
+  }
+
+  if (!character) {
+    return (
+      <PageTransition>
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col items-center justify-center text-white text-center px-4">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="text-6xl mb-4"
+          >
+            ❌
+          </motion.div>
+          <h1 className="text-2xl font-bold mb-2">Character Not Found</h1>
+          <p className="text-white/60 mb-6">{error}</p>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => navigate("/")}
+            className="bg-blue-600 hover:bg-blue-500 px-6 py-3 rounded-lg font-semibold transition"
+          >
+            ← Back to Characters
+          </motion.button>
         </div>
       </PageTransition>
     )
@@ -161,6 +200,10 @@ export default function Chat() {
               transition={{ type: "spring", delay: 0.2 }}
               src={character.avatar || "https://via.placeholder.com/60"}
               alt={character.name}
+              onError={(e) => {
+                const img = e.target as HTMLImageElement
+                img.src = `https://via.placeholder.com/60?text=${encodeURIComponent(character.name.substring(0, 2))}`
+              }}
               className="w-14 h-14 rounded-xl object-cover border-2 border-blue-500/50 shadow-lg shadow-blue-500/20"
             />
           </div>
