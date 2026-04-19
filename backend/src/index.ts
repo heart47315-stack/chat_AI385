@@ -1,6 +1,7 @@
 import express from "express"
 import cors from "cors"
 import dotenv from "dotenv"
+import path from "path"
 import chatRoute from "./routes/chat"
 import characterRoute from "./routes/character"
 
@@ -14,6 +15,9 @@ app.use(cors({
   credentials: true
 }))
 app.use(express.json())
+
+// Serve static files
+app.use(express.static(path.join(__dirname, "../public")))
 
 // Health check
 app.get("/health", (req, res) => {
