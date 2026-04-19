@@ -33,16 +33,20 @@ export default function Home() {
   }
 
   return (
-    <div className="bg-[#8b8070] min-h-screen text-white flex flex-col items-center justify-start">
+    <div className="bg-gradient-to-br from-[#a89f91] via-[#9c927f] to-[#8b8070] min-h-screen text-white flex justify-center">
       {/* 📱 Container - Locked Width 400px */}
-      <div className="w-[400px] flex flex-col h-screen">
+      <div className="w-[400px] min-h-screen backdrop-blur-xl bg-white/10 border border-white/10 rounded-3xl shadow-2xl flex flex-col">
 
         {/* Header */}
-        <div className="px-4 pt-4 pb-3">
+        <div className="px-4 pt-5 pb-3">
           {/* Title */}
-          <div className="mb-3 flex items-center gap-2">
-            <span className="text-2xl">🔥</span>
-            <span className="text-xs text-white/70 font-medium">CHARACTERS</span>
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">🔥</span>
+              <span className="text-sm font-semibold tracking-wide text-white/80">
+                CHARACTERS
+              </span>
+            </div>
           </div>
 
           {/* Search Bar */}
@@ -51,7 +55,7 @@ export default function Home() {
             placeholder="Search characters..."
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
-            className="w-full px-4 py-2 rounded-full bg-white/15 text-white placeholder-white/60 outline-none focus:bg-white/25 transition text-sm"
+            className="w-full px-4 py-2 rounded-full bg-white/20 backdrop-blur-md text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/30 transition text-sm"
           />
         </div>
 
@@ -82,16 +86,16 @@ export default function Home() {
                   className="group relative"
                 >
                   {/* Card */}
-                  <div className="bg-white/10 rounded-2xl overflow-hidden shadow-md hover:shadow-lg hover:bg-white/15 transition">
+                  <div className="bg-white/10 backdrop-blur-md rounded-2xl overflow-hidden border border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.3)] hover:shadow-2xl hover:scale-[1.03] transition-all duration-300 ease-out">
                     {/* Image - Fixed Height */}
-                    <div className="relative w-full h-[160px] overflow-hidden bg-white/5">
+                    <div className="relative w-full h-[170px] overflow-hidden bg-white/5">
                       <img
                         src={c.avatar || "https://via.placeholder.com/300x300?text=" + c.name}
                         alt={c.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
-                      {/* Gradient Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                      {/* Gradient Overlay - Cinematic */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
 
                       {/* NSFW Badge */}
                       {c.isNSFW && (
@@ -103,8 +107,8 @@ export default function Home() {
                     </div>
 
                     {/* Info */}
-                    <div className="p-2">
-                      <h3 className="font-bold text-sm text-white line-clamp-1">{c.name}</h3>
+                    <div className="p-3">
+                      <h3 className="font-semibold text-sm tracking-wide text-white line-clamp-1">{c.name}</h3>
                       <p className="text-xs text-white/70 line-clamp-1">{c.description}</p>
                     </div>
                   </div>
@@ -114,23 +118,23 @@ export default function Home() {
           )}
         </div>
 
-        {/* Bottom Nav - Fixed */}
-        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-[400px] bg-black/30 backdrop-blur-md rounded-t-3xl px-4 py-3 flex justify-around items-center">
-          <a href="/" className="flex flex-col items-center gap-1 text-white hover:text-white transition group">
-            <span className="text-lg group-hover:scale-125 transition">🏠</span>
-            <span className="text-xs">Home</span>
+        {/* Bottom Nav - Floating iOS Style */}
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[360px] bg-white/10 backdrop-blur-xl border border-white/10 rounded-2xl px-4 py-3 flex justify-around shadow-xl">
+          <a href="/" className="flex flex-col items-center gap-1 text-white transition-all duration-300 ease-out group">
+            <span className="text-lg group-hover:scale-125 transition-transform duration-300">🏠</span>
+            <span className="text-xs font-medium">Home</span>
           </a>
-          <a href="/create-profile" className="flex flex-col items-center gap-1 text-white/70 hover:text-white transition group">
-            <span className="text-lg group-hover:scale-125 transition">➕</span>
-            <span className="text-xs">Create</span>
+          <a href="/create-profile" className="flex flex-col items-center gap-1 text-white/50 hover:text-white transition-all duration-300 ease-out group">
+            <span className="text-lg group-hover:scale-125 transition-transform duration-300">➕</span>
+            <span className="text-xs font-medium">Create</span>
           </a>
-          <button className="flex flex-col items-center gap-1 text-white/70 hover:text-white transition group">
-            <span className="text-lg group-hover:scale-125 transition">❤️</span>
-            <span className="text-xs">Favorites</span>
+          <button className="flex flex-col items-center gap-1 text-white/50 hover:text-white transition-all duration-300 ease-out group">
+            <span className="text-lg group-hover:scale-125 transition-transform duration-300">❤️</span>
+            <span className="text-xs font-medium">Favorites</span>
           </button>
-          <a href="/profile" className="flex flex-col items-center gap-1 text-white/70 hover:text-white transition group">
-            <span className="text-lg group-hover:scale-125 transition">👤</span>
-            <span className="text-xs">Profile</span>
+          <a href="/profile" className="flex flex-col items-center gap-1 text-white/50 hover:text-white transition-all duration-300 ease-out group">
+            <span className="text-lg group-hover:scale-125 transition-transform duration-300">👤</span>
+            <span className="text-xs font-medium">Profile</span>
           </a>
         </div>
       </div>
