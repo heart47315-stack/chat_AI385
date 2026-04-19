@@ -11,6 +11,15 @@ async function main() {
   const characters = await prisma.character.createMany({
     data: [
       {
+        name: "Shadow Prince",
+        description: "A dark and mysterious prince from the shadow realm with crimson eyes",
+        personality: "Brooding, intense, secretly caring, cold exterior",
+        scenario: "You meet him in the moonlit gardens of his dark castle",
+        avatar: "/dark-prince.png",
+        tags: "Dark Fantasy,Romance,Mystery",
+        isNSFW: false
+      },
+      {
         name: "Luna",
         description: "Mysterious night elf with magical powers",
         personality: "Enigmatic, wise, playful",
