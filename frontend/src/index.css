@@ -17,8 +17,8 @@ body,
 }
 
 body {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
-  color: #fff;
+  background: linear-gradient(135deg, #333e58 0%, #1e293b 50%, #000000 100%);
+  color: #ffffff;
 }
 
 /* Scrollbar Styling */
@@ -27,7 +27,7 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(57, 118, 132, 0.204);
 }
 
 ::-webkit-scrollbar-thumb {
@@ -70,11 +70,11 @@ body {
 
   0%,
   100% {
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+    box-shadow: 0 0 20px rgba(2, 12, 27, 0.5);
   }
 
   50% {
-    box-shadow: 0 0 40px rgba(59, 130, 246, 0.8);
+    box-shadow: 0 0 40px rgba(33, 91, 148, 0.8);
   }
 }
 

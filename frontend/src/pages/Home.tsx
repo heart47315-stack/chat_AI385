@@ -129,7 +129,7 @@ export default function Home() {
                           className="w-full h-full object-cover"
                           onError={(e) => {
                             const img = e.target as HTMLImageElement
-                            img.src = `https://via.placeholder.com/300x200?text=${encodeURIComponent(character.name)}`
+                            img.src = `https://i.pinimg.com/1200x/dd/57/02/dd570293370cfceaa05378bbb31b49d9.jpg?text=${encodeURIComponent(character.name)}`
                           }}
                         />
                       </div>
