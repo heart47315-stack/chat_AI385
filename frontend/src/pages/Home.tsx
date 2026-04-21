@@ -5,7 +5,7 @@ import axios from "axios"
 import Layout from "../components/Layout"
 import PageTransition from "../components/PageTransition"
 
-const API_BASE_URL = "http://localhost:5000"
+const API_BASE_URL = "http://localhost:3000" // ✅ FIX PORT
 
 export default function Home() {
   const [characters, setCharacters] = useState<any[]>([])
@@ -14,15 +14,17 @@ export default function Home() {
   const [error, setError] = useState("")
   const [searchTerm, setSearchTerm] = useState("")
 
-  // 🔥 Fetch characters
   useEffect(() => {
     const fetchCharacters = async () => {
       try {
         setLoading(true)
         setError("")
 
-        const res = await axios.get(`${API_BASE_URL}/character`)
-        console.log("🔥 API RESPONSE:", res.data)
+        console.log("📡 Fetch:", `${API_BASE_URL}/character`)
+
+        const res = await axios.get(`${API_BASE_URL}/character`, {
+          timeout: 5000
+        })
 
         if (!Array.isArray(res.data)) {
           throw new Error("API ไม่ส่ง array")
@@ -30,23 +32,23 @@ export default function Home() {
 
         setCharacters(res.data)
         setFilteredCharacters(res.data)
-      } catch (err) {
-        console.error("❌ API ERROR:", err)
 
-        // fallback กันหน้าว่าง
+      } catch (err: any) {
+        console.error("❌ API ERROR:", err.message)
+
         const mockData = [
           {
-            id: 1,
-            name: "Vincent",
-            description: "Cold mafia boss",
-            avatar: "https://via.placeholder.com/300x200?text=Vincent",
-            tags: "Mafia",
+            id: "1",
+            name: "Offline AI",
+            description: "Backend ยังไม่รัน",
+            avatar: "https://placehold.co/300x200?text=Offline",
+            tags: "offline",
           },
         ]
 
         setCharacters(mockData)
         setFilteredCharacters(mockData)
-        setError("⚠️ backend อาจไม่ทำงาน")
+        setError("⚠️ Backend ไม่ทำงาน (ใช้ข้อมูลจำลอง)")
       } finally {
         setLoading(false)
       }
@@ -55,7 +57,6 @@ export default function Home() {
     fetchCharacters()
   }, [])
 
-  // 🔍 Search
   const handleSearch = (query: string) => {
     setSearchTerm(query)
 
@@ -72,30 +73,29 @@ export default function Home() {
     <PageTransition>
       <Layout title="🔥 ตัวละคร" subtitle="เลือกตัวละครเพื่อแชทกับ AI">
 
-        {/* 🔥 ปุ่มสร้างตัวละคร (สำคัญ) */}
         <div className="flex justify-between items-center mb-6">
           <input
             type="text"
             placeholder="ค้นหา..."
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
-            className="w-full mr-3 px-4 py-2 rounded-lg bg-white/10 text-white outline-none"
+            className="w-full mr-3 px-4 py-2 rounded-xl bg-white/10 text-white outline-none focus:ring-2 focus:ring-blue-500"
           />
 
           <Link
-            to="/create"
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg whitespace-nowrap"
+            to="/create-character"
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl whitespace-nowrap"
           >
             + สร้าง
           </Link>
         </div>
 
-        {/* ❌ Error */}
         {error && (
-          <div className="mb-4 text-red-400 text-sm">{error}</div>
+          <div className="mb-4 text-yellow-400 text-sm">
+            {error}
+          </div>
         )}
 
-        {/* ⏳ Loading */}
         {loading ? (
           <div className="text-center py-20 text-white/60">
             กำลังโหลด...
@@ -108,47 +108,35 @@ export default function Home() {
           <div className="grid grid-cols-2 gap-4">
             {filteredCharacters.map((character) => {
 
-              // ✅ FIX รูป (สำคัญ)
               const imageSrc =
                 character.avatar ||
                 (character.image
                   ? `${API_BASE_URL}/images/${character.image}`
                   : null) ||
-                `https://via.placeholder.com/300x200?text=${encodeURIComponent(character.name)}`
+                `https://placehold.co/300x200?text=${encodeURIComponent(character.name)}`
 
               return (
-                <motion.div key={character.id}>
+                <motion.div key={String(character.id)}>
                   <Link to={`/chat/${character.id}`}>
                     <div className="bg-white/10 rounded-xl overflow-hidden">
 
-                      {/* 🖼 IMAGE */}
                       <div className="h-40 bg-gray-800">
                         <img
                           src={imageSrc}
                           alt={character.name}
                           className="w-full h-full object-cover"
-                          onError={(e) => {
-                            const img = e.target as HTMLImageElement
-                            img.src = `https://i.pinimg.com/1200x/dd/57/02/dd570293370cfceaa05378bbb31b49d9.jpg?text=${encodeURIComponent(character.name)}`
-                          }}
                         />
                       </div>
 
-                      {/* 📄 CONTENT */}
                       <div className="p-3">
-                        <h3 className="text-white font-bold text-sm">
+                        <h3 className="text-white font-bold text-sm truncate">
                           {character.name}
                         </h3>
-                        <p className="text-white/60 text-xs">
+                        <p className="text-white/60 text-xs line-clamp-2">
                           {character.description}
                         </p>
-
-                        {character.tags && (
-                          <span className="text-xs text-blue-300">
-                            {character.tags}
-                          </span>
-                        )}
                       </div>
+
                     </div>
                   </Link>
                 </motion.div>

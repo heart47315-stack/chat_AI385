@@ -6,89 +6,123 @@ const OpenAI = require('openai');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Initialize OpenAI
+// ✅ OpenAI
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Health check endpoint
+// ✅ in-memory database
+let characters = [];
+let chats = [];
+
+// =========================
+// HEALTH
+// =========================
 app.get('/health', (req, res) => {
-    res.json({ status: 'OK', message: 'AI Chat Backend is running' });
+    res.json({ status: 'OK' });
 });
 
-// Chat endpoint
+// =========================
+// CHARACTER
+// =========================
+
+// 🔥 GET all characters
+app.get('/character', (req, res) => {
+    res.json(characters);
+});
+
+// 🔥 CREATE character
+app.post('/character', (req, res) => {
+    const { name, description, avatar } = req.body;
+
+    if (!name) {
+        return res.status(400).json({ error: 'Name is required' });
+    }
+
+    const newChar = {
+        id: Date.now().toString(),
+        name,
+        description: description || '',
+        avatar: avatar || '',
+    };
+
+    characters.push(newChar);
+    res.json(newChar);
+});
+
+// =========================
+// CHAT HISTORY
+// =========================
+
+// 🔥 GET chat history
+app.get('/chat', (req, res) => {
+    const { characterId } = req.query;
+
+    const history = chats.filter(c => c.characterId === characterId);
+    res.json(history);
+});
+
+// =========================
+// CHAT AI
+// =========================
 app.post('/chat', async (req, res) => {
     try {
-        const { message } = req.body;
+        const { message, characterId } = req.body;
 
-        if (!message || typeof message !== 'string') {
-            return res.status(400).json({ error: 'Message is required' });
+        if (!message) {
+            return res.status(400).json({ error: 'Message required' });
         }
 
-        if (!process.env.OPENAI_API_KEY) {
-            return res.status(500).json({
-                error: 'OpenAI API key not configured. Set OPENAI_API_KEY in .env',
-            });
-        }
+        // 🔥 หา character
+        const character = characters.find(c => c.id === characterId);
 
-        // Create chat completion
+        // 🔥 สร้าง system prompt
+        const systemPrompt = character
+            ? `You are ${character.name}. ${character.description}`
+            : 'You are a helpful AI assistant';
+
+        // 🔥 เรียก OpenAI
         const completion = await openai.chat.completions.create({
-            model: 'gpt-3.5-turbo',
+            model: 'gpt-4o-mini', // 🔥 แนะนำตัวนี้แทน 3.5
             messages: [
-                {
-                    role: 'system',
-                    content:
-                        'You are a helpful, friendly AI assistant. Keep responses concise and under 200 words.',
-                },
-                {
-                    role: 'user',
-                    content: message,
-                },
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: message },
             ],
-            max_tokens: 500,
             temperature: 0.7,
         });
 
         const reply = completion.choices[0].message.content;
 
-        res.json({ reply });
-    } catch (error) {
-        console.error('OpenAI API Error:', error);
+        // 🔥 save history
+        chats.push({
+            characterId,
+            sender: 'user',
+            content: message,
+        });
 
-        if (error.status === 401) {
-            res.status(401).json({
-                error: 'Invalid OpenAI API key',
-            });
-        } else if (error.status === 429) {
-            res.status(429).json({
-                error: 'Rate limit exceeded. Please try again later.',
-            });
-        } else {
-            res.status(500).json({
-                error: error.message || 'Internal server error',
-            });
-        }
+        chats.push({
+            characterId,
+            sender: 'ai',
+            content: reply,
+        });
+
+        res.json({ reply });
+
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            error: error.message || 'AI error',
+        });
     }
 });
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-    console.error(err);
-    res.status(500).json({ error: 'Internal server error' });
-});
-
-// Start server
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`
-╔════════════════════════════════════════╗
-║   AI Chat Backend is running!          ║
-║   Port: ${PORT}                            ║
-║   API: http://0.0.0.0:${PORT}              ║
-║   Health: http://localhost:${PORT}/health ║
-╚════════════════════════════════════════╝
-  `);
+// =========================
+// START SERVER
+// =========================
+app.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
 });

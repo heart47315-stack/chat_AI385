@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Debug Chat Test</title>
     <style>
@@ -9,18 +10,22 @@
             color: white;
             padding: 20px;
         }
+
         .log {
             background: #222;
             padding: 10px;
             margin: 5px 0;
             border-left: 3px solid #0099ff;
         }
-        input, button {
+
+        input,
+        button {
             padding: 10px;
             margin: 10px 0;
             width: 100%;
             font-size: 16px;
         }
+
         button {
             background: #0066cc;
             color: white;
@@ -29,23 +34,24 @@
         }
     </style>
 </head>
+
 <body>
     <h1>🔧 Debug Chat Test</h1>
-    
+
     <h2>1. Test API Connection</h2>
     <button onclick="testAPI()">Test /character</button>
-    
+
     <h2>2. Send Message</h2>
     <input type="text" id="message" placeholder="Enter message">
     <input type="text" id="charId" placeholder="Enter character ID">
     <button onclick="sendMessage()">Send Test Message</button>
-    
+
     <h2>📋 Logs:</h2>
     <div id="logs"></div>
 
     <script>
-        const API_URL = "http://localhost:5000";
-        
+        const API_URL = "http://localhost:3000";
+
         function log(msg) {
             console.log(msg);
             const logsDiv = document.getElementById("logs");
@@ -70,14 +76,14 @@
         async function sendMessage() {
             const message = document.getElementById("message").value;
             const charId = document.getElementById("charId").value;
-            
+
             log(`📤 Sending: message="${message}", charId="${charId}"`);
-            
+
             if (!message) {
                 log("❌ Message is empty");
                 return;
             }
-            
+
             if (!charId) {
                 log("❌ Character ID is empty");
                 return;
@@ -89,11 +95,11 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ message, characterId: charId })
                 });
-                
+
                 const data = await res.json();
                 log(`📥 Status: ${res.status}`);
                 log(`📥 Response: ${JSON.stringify(data)}`);
-                
+
                 if (data.reply) {
                     log(`🤖 AI Reply: ${data.reply}`);
                 } else {
@@ -111,4 +117,5 @@
         };
     </script>
 </body>
+
 </html>
