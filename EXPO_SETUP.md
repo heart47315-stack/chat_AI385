@@ -87,13 +87,13 @@ You should see:
 ║   AI Chat Backend is running!          ║
 ║   Port: 3000                           ║
 ║   API: http://0.0.0.0:3000             ║
-║   Health: http://localhost:3000/health ║
+║   Health: http://localhost:5000/health ║
 ╚════════════════════════════════════════╝
 ```
 
 ### 5. Test Backend (Optional)
 ```bash
-curl -X POST http://localhost:3000/chat \
+curl -X POST http://localhost:5000/chat \
   -H "Content-Type: application/json" \
   -d '{"message": "Hello AI"}'
 ```

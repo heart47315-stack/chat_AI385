@@ -5,7 +5,7 @@ import axios from "axios"
 import Layout from "../components/Layout"
 import PageTransition from "../components/PageTransition"
 
-const API_BASE_URL = "http://localhost:3000"
+const API_BASE_URL = "http://localhost:5000"
 
 interface Character {
   id: string

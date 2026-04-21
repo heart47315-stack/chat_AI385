@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom"
 import Layout from "../components/Layout"
 import PageTransition from "../components/PageTransition"
 
-const API = "http://localhost:3000" // ✅ FIX PORT
+const API = "http://localhost:5000" // ✅ FIX PORT
 
 export default function CreateCharacter() {
   const navigate = useNavigate()

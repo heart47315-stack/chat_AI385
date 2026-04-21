@@ -4,7 +4,7 @@ import { motion } from "framer-motion"
 import axios from "axios"
 import PageTransition from "../components/PageTransition"
 
-const API_BASE_URL = "http://localhost:3000" // ✅ FIX PORT
+const API_BASE_URL = "http://localhost:5000" // ✅ FIX PORT
 
 interface Message {
   role: "user" | "ai"
