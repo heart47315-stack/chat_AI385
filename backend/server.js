@@ -1,63 +1,56 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
-const OpenAI = require('openai');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 
 app.use(cors());
 app.use(express.json());
 
-// ✅ OpenAI
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+// 🔥 mock database
+let characters = [
+    {
+        id: "1",
+        name: "AI Girl",
+        description: "แฟน AI ของคุณ 💖",
+        avatar: ""
+    }
+];
 
-// ✅ in-memory database
-let characters = [];
 let chats = [];
 
-// =========================
-// HEALTH
-// =========================
-app.get('/health', (req, res) => {
-    res.json({ status: 'OK' });
+// ==================
+// TEST
+// ==================
+app.post('/test', (req, res) => {
+    res.json({ ok: true });
 });
 
-// =========================
+// ==================
 // CHARACTER
-// =========================
-
-// 🔥 GET all characters
+// ==================
 app.get('/character', (req, res) => {
-    res.json(characters);
+    res.json(characters); // ✅ ต้องเป็น array
 });
 
-// 🔥 CREATE character
 app.post('/character', (req, res) => {
     const { name, description, avatar } = req.body;
-
-    if (!name) {
-        return res.status(400).json({ error: 'Name is required' });
-    }
 
     const newChar = {
         id: Date.now().toString(),
         name,
-        description: description || '',
-        avatar: avatar || '',
+        description,
+        avatar
     };
 
     characters.push(newChar);
     res.json(newChar);
 });
 
-// =========================
+// ==================
 // CHAT HISTORY
-// =========================
-
-// 🔥 GET chat history
+// ==================
 app.get('/chat', (req, res) => {
     const { characterId } = req.query;
 
@@ -65,64 +58,29 @@ app.get('/chat', (req, res) => {
     res.json(history);
 });
 
-// =========================
-// CHAT AI
-// =========================
-app.post('/chat', async (req, res) => {
-    try {
-        const { message, characterId } = req.body;
+// ==================
+// CHAT
+// ==================
+app.post('/chat', (req, res) => {
+    const { message, characterId } = req.body;
 
-        if (!message) {
-            return res.status(400).json({ error: 'Message required' });
-        }
+    const reply = `🤖 AI: ${message}`;
 
-        // 🔥 หา character
-        const character = characters.find(c => c.id === characterId);
+    chats.push({
+        characterId,
+        sender: "user",
+        content: message
+    });
 
-        // 🔥 สร้าง system prompt
-        const systemPrompt = character
-            ? `You are ${character.name}. ${character.description}`
-            : 'You are a helpful AI assistant';
+    chats.push({
+        characterId,
+        sender: "ai",
+        content: reply
+    });
 
-        // 🔥 เรียก OpenAI
-        const completion = await openai.chat.completions.create({
-            model: 'gpt-4o-mini', // 🔥 แนะนำตัวนี้แทน 3.5
-            messages: [
-                { role: 'system', content: systemPrompt },
-                { role: 'user', content: message },
-            ],
-            temperature: 0.7,
-        });
-
-        const reply = completion.choices[0].message.content;
-
-        // 🔥 save history
-        chats.push({
-            characterId,
-            sender: 'user',
-            content: message,
-        });
-
-        chats.push({
-            characterId,
-            sender: 'ai',
-            content: reply,
-        });
-
-        res.json({ reply });
-
-    } catch (error) {
-        console.error(error);
-
-        res.status(500).json({
-            error: error.message || 'AI error',
-        });
-    }
+    res.json({ reply });
 });
 
-// =========================
-// START SERVER
-// =========================
 app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
+    console.log("🚀 http://localhost:3000");
 });

@@ -26,22 +26,22 @@ export default function Home() {
           timeout: 5000
         })
 
-        if (!Array.isArray(res.data)) {
-          throw new Error("API ไม่ส่ง array")
-        }
+        // ✅ FIX: กัน API พัง
+        const data = Array.isArray(res.data) ? res.data : []
 
-        setCharacters(res.data)
-        setFilteredCharacters(res.data)
+        setCharacters(data)
+        setFilteredCharacters(data)
 
       } catch (err: any) {
         console.error("❌ API ERROR:", err.message)
 
+        // 🔥 fallback data
         const mockData = [
           {
             id: "1",
             name: "Offline AI",
-            description: "Backend ยังไม่รัน",
-            avatar: "https://placehold.co/300x200?text=Offline",
+            description: "Backend ยังไม่ทำงาน",
+            avatar: "",
             tags: "offline",
           },
         ]
@@ -57,6 +57,7 @@ export default function Home() {
     fetchCharacters()
   }, [])
 
+  // 🔍 Search
   const handleSearch = (query: string) => {
     setSearchTerm(query)
 
@@ -73,6 +74,7 @@ export default function Home() {
     <PageTransition>
       <Layout title="🔥 ตัวละคร" subtitle="เลือกตัวละครเพื่อแชทกับ AI">
 
+        {/* 🔍 SEARCH + CREATE */}
         <div className="flex justify-between items-center mb-6">
           <input
             type="text"
@@ -90,12 +92,14 @@ export default function Home() {
           </Link>
         </div>
 
+        {/* ❌ Error */}
         {error && (
           <div className="mb-4 text-yellow-400 text-sm">
             {error}
           </div>
         )}
 
+        {/* ⏳ Loading */}
         {loading ? (
           <div className="text-center py-20 text-white/60">
             กำลังโหลด...
@@ -116,18 +120,28 @@ export default function Home() {
                 `https://placehold.co/300x200?text=${encodeURIComponent(character.name)}`
 
               return (
-                <motion.div key={String(character.id)}>
+                <motion.div
+                  key={String(character.id)}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                >
                   <Link to={`/chat/${character.id}`}>
-                    <div className="bg-white/10 rounded-xl overflow-hidden">
+                    <div className="bg-white/10 rounded-xl overflow-hidden backdrop-blur-lg border border-white/10 shadow-lg">
 
+                      {/* 🖼 IMAGE */}
                       <div className="h-40 bg-gray-800">
                         <img
                           src={imageSrc}
                           alt={character.name}
                           className="w-full h-full object-cover"
+                          onError={(e) => {
+                            const img = e.target as HTMLImageElement
+                            img.src = `https://placehold.co/300x200?text=${encodeURIComponent(character.name)}`
+                          }}
                         />
                       </div>
 
+                      {/* 📄 CONTENT */}
                       <div className="p-3">
                         <h3 className="text-white font-bold text-sm truncate">
                           {character.name}
@@ -135,6 +149,12 @@ export default function Home() {
                         <p className="text-white/60 text-xs line-clamp-2">
                           {character.description}
                         </p>
+
+                        {character.tags && (
+                          <span className="text-xs text-blue-300">
+                            #{character.tags}
+                          </span>
+                        )}
                       </div>
 
                     </div>
