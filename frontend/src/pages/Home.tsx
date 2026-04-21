@@ -5,11 +5,20 @@ import axios from "axios"
 import Layout from "../components/Layout"
 import PageTransition from "../components/PageTransition"
 
-const API_BASE_URL = "http://localhost:3000" // ✅ FIX PORT
+const API_BASE_URL = "http://localhost:3000"
+
+interface Character {
+  id: string
+  name: string
+  description: string
+  avatar?: string
+  image?: string
+  tags?: string
+}
 
 export default function Home() {
-  const [characters, setCharacters] = useState<any[]>([])
-  const [filteredCharacters, setFilteredCharacters] = useState<any[]>([])
+  const [characters, setCharacters] = useState<Character[]>([])
+  const [filteredCharacters, setFilteredCharacters] = useState<Character[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [searchTerm, setSearchTerm] = useState("")
@@ -26,7 +35,6 @@ export default function Home() {
           timeout: 5000
         })
 
-        // ✅ FIX: กัน API พัง
         const data = Array.isArray(res.data) ? res.data : []
 
         setCharacters(data)
@@ -35,15 +43,36 @@ export default function Home() {
       } catch (err: any) {
         console.error("❌ API ERROR:", err.message)
 
-        // 🔥 fallback data
-        const mockData = [
+        // 🔥 fallback 4 ตัว
+        const mockData: Character[] = [
           {
             id: "1",
-            name: "Offline AI",
-            description: "Backend ยังไม่ทำงาน",
-            avatar: "",
-            tags: "offline",
+            name: "Luna 💖",
+            description: "แฟน AI อ่อนโยน อบอุ่น",
+            avatar: "https://placehold.co/300x200?text=Luna",
+            tags: "romantic"
           },
+          {
+            id: "2",
+            name: "Akira 😈",
+            description: "หนุ่มกวน ปากร้าย แต่ห่วง",
+            avatar: "https://placehold.co/300x200?text=Akira",
+            tags: "tsundere"
+          },
+          {
+            id: "3",
+            name: "Nova 🤖",
+            description: "AI อัจฉริยะ ตอบทุกคำถาม",
+            avatar: "https://placehold.co/300x200?text=Nova",
+            tags: "smart"
+          },
+          {
+            id: "4",
+            name: "Yuki 🌸",
+            description: "สาวน้อยสดใส ขี้อ้อน",
+            avatar: "https://placehold.co/300x200?text=Yuki",
+            tags: "cute"
+          }
         ]
 
         setCharacters(mockData)
@@ -74,7 +103,7 @@ export default function Home() {
     <PageTransition>
       <Layout title="🔥 ตัวละคร" subtitle="เลือกตัวละครเพื่อแชทกับ AI">
 
-        {/* 🔍 SEARCH + CREATE */}
+        {/* 🔍 SEARCH */}
         <div className="flex justify-between items-center mb-6">
           <input
             type="text"
@@ -86,20 +115,20 @@ export default function Home() {
 
           <Link
             to="/create-character"
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl whitespace-nowrap"
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl"
           >
             + สร้าง
           </Link>
         </div>
 
-        {/* ❌ Error */}
+        {/* ERROR */}
         {error && (
           <div className="mb-4 text-yellow-400 text-sm">
             {error}
           </div>
         )}
 
-        {/* ⏳ Loading */}
+        {/* LOADING */}
         {loading ? (
           <div className="text-center py-20 text-white/60">
             กำลังโหลด...
@@ -121,32 +150,32 @@ export default function Home() {
 
               return (
                 <motion.div
-                  key={String(character.id)}
+                  key={character.id}
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
                 >
                   <Link to={`/chat/${character.id}`}>
-                    <div className="bg-white/10 rounded-xl overflow-hidden backdrop-blur-lg border border-white/10 shadow-lg">
+                    <div className="bg-white/10 rounded-xl overflow-hidden border border-white/10">
 
-                      {/* 🖼 IMAGE */}
+                      {/* IMAGE */}
                       <div className="h-40 bg-gray-800">
                         <img
                           src={imageSrc}
                           alt={character.name}
                           className="w-full h-full object-cover"
                           onError={(e) => {
-                            const img = e.target as HTMLImageElement
-                            img.src = `https://placehold.co/300x200?text=${encodeURIComponent(character.name)}`
+                            (e.target as HTMLImageElement).src =
+                              `https://placehold.co/300x200?text=${encodeURIComponent(character.name)}`
                           }}
                         />
                       </div>
 
-                      {/* 📄 CONTENT */}
+                      {/* CONTENT */}
                       <div className="p-3">
-                        <h3 className="text-white font-bold text-sm truncate">
+                        <h3 className="text-white font-bold text-sm">
                           {character.name}
                         </h3>
-                        <p className="text-white/60 text-xs line-clamp-2">
+                        <p className="text-white/60 text-xs">
                           {character.description}
                         </p>
 
