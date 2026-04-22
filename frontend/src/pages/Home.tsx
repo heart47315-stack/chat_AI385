@@ -49,28 +49,28 @@ export default function Home() {
             id: "1",
             name: "Luna 💖",
             description: "แฟน AI อ่อนโยน อบอุ่น",
-            avatar: "https://placehold.co/300x200?text=Luna",
+            avatar: "https://www.pinterest.com/pin/883127808193372331/",
             tags: "romantic"
           },
           {
             id: "2",
             name: "Akira 😈",
             description: "หนุ่มกวน ปากร้าย แต่ห่วง",
-            avatar: "https://placehold.co/300x200?text=Akira",
+            avatar: "https://www.pinterest.com/pin/952652127445209337/",
             tags: "tsundere"
           },
           {
             id: "3",
             name: "Nova 🤖",
             description: "AI อัจฉริยะ ตอบทุกคำถาม",
-            avatar: "https://placehold.co/300x200?text=Nova",
+            avatar: "https://www.pinterest.com/pin/600878775328612572/",
             tags: "smart"
           },
           {
             id: "4",
             name: "Yuki 🌸",
             description: "สาวน้อยสดใส ขี้อ้อน",
-            avatar: "https://placehold.co/300x200?text=Yuki",
+            avatar: "https://images.unsplash.com/photo-1502685104226-ee32379fefbe",
             tags: "cute"
           }
         ]
