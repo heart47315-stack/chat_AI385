@@ -27,11 +27,17 @@ function AnimatedRoutes() {
 export default function App() {
   return (
     <BrowserRouter>
-      <div className="h-[100dvh] flex flex-col bg-slate-900">
-        <div className="flex-1 overflow-hidden">
+      {/* FIX: ใช้ height เต็มจอ + flex layout ถูกต้อง */}
+      <div className="h-screen flex flex-col bg-slate-900">
+
+        {/* FIX: ห้าม overflow-hidden */}
+        <div className="flex-1 overflow-y-auto">
           <AnimatedRoutes />
         </div>
+
+        {/* Bottom nav fix อยู่ล่างเสมอ */}
         <BottomNav />
+
       </div>
     </BrowserRouter>
   )

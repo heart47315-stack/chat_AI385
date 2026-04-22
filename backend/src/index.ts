@@ -2,7 +2,8 @@ import express from "express"
 import cors from "cors"
 import dotenv from "dotenv"
 import path from "path"
-import { PrismaClient } from "@prisma/client"
+const { PrismaClient } = require('@prisma/client');
+
 import chatRoute from "./routes/chat"
 import characterRoute from "./routes/character"
 

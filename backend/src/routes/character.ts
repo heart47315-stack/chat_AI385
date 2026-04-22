@@ -1,5 +1,6 @@
 import { Router, Request, Response } from "express"
-import { PrismaClient } from "@prisma/client"
+const { PrismaClient } = require('@prisma/client');
+
 
 interface CreateCharacterRequest {
   name: string
